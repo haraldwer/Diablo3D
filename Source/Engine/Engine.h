@@ -4,8 +4,8 @@
 
 #include <Windows.h>
 
-#include "CSystemManager.h"
 #include "SceneManager.h"
+#include "Components/CSystemManager.h"
 
 class Engine
 {

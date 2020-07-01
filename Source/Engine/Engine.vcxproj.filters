@@ -30,16 +30,19 @@
     <ClInclude Include="SceneManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CSystem.h">
+    <ClInclude Include="Components\CSystems\CModelRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CSystems\CModelRenderer.h">
+    <ClInclude Include="Components\CContainer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CSystemManager.h">
+    <ClInclude Include="Components\CSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CSystemLoader.h">
+    <ClInclude Include="Components\CSystems.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Components\CSystemManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -61,13 +64,13 @@
     <ClCompile Include="SceneManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CSystem.cpp">
+    <ClCompile Include="Components\CSystems\CModelRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CSystems\CModelRenderer.cpp">
+    <ClCompile Include="Components\CSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CSystemManager.cpp">
+    <ClCompile Include="Components\CSystemManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -150,10 +150,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="CSystemLoader.h" />
-    <ClInclude Include="CSystemManager.h" />
-    <ClInclude Include="CSystems\CModelRenderer.h" />
-    <ClInclude Include="CSystem.h" />
+    <ClInclude Include="Components\CContainer.h" />
+    <ClInclude Include="Components\CSystems.h" />
+    <ClInclude Include="Components\CSystems\CModelRenderer.h" />
+    <ClInclude Include="Components\CSystemManager.h" />
+    <ClInclude Include="Components\CSystem.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="resource.h" />
@@ -167,11 +168,14 @@
     <ProjectReference Include="..\CommonUtilities\CommonUtilities.vcxproj">
       <Project>{714dcaac-b109-4795-9ed1-192e3e5677f3}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\D3DX11\D3DX11.vcxproj">
+      <Project>{0f088d2e-ae36-4359-b066-e3951c700ab0}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="CSystemManager.cpp" />
-    <ClCompile Include="CSystems\CModelRenderer.cpp" />
-    <ClCompile Include="CSystem.cpp" />
+    <ClCompile Include="Components\CSystems\CModelRenderer.cpp" />
+    <ClCompile Include="Components\CSystemManager.cpp" />
+    <ClCompile Include="Components\CSystem.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Scene.cpp" />

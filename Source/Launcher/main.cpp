@@ -2,7 +2,7 @@
 #include "../D3DX11/D3DSystem.h"
 #include "../Engine/Engine.h"
 
-#define USE_CONSOLE_COMMAND
+//#define USE_CONSOLE_COMMAND
 
 void InitConsole()
 {
