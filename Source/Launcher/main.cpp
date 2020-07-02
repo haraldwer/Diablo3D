@@ -1,8 +1,10 @@
 
 #include "../D3DX11/D3DSystem.h"
 #include "../Engine/Engine.h"
+#include <iostream>
+#include "../EngineLoader/EngineLoader.h"
 
-//#define USE_CONSOLE_COMMAND
+#define USE_CONSOLE_COMMAND
 
 void InitConsole()
 {
@@ -34,19 +36,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 #ifdef USE_CONSOLE_COMMAND
 	InitConsole();
 #endif
-	
+
 	D3DSystem System;
-	Engine engine;
+	EngineLoader engineLoader(System, "Engine.dll");
 	CreateParams params;
-	params.myUpdateFunction = [&] { engine.Update(); };
-	params.myInitFunction = [&] { engine.Init(); };
-	params.myMessageHandlerFunction = [&](HWND hwnd, UINT uint, WPARAM wparam, LPARAM lparam) { return engine.MessageHandler(hwnd, uint, wparam, lparam); };
+	params.myInitFunction = [&] { engineLoader.Init(); };
+	params.myUpdateFunction = [&] { engineLoader.Update(true); };
+	//params.myMessageHandlerFunction = [&](HWND hwnd, UINT uint, WPARAM wparam, LPARAM lparam) { return engine.MessageHandler(hwnd, uint, wparam, lparam); };
 	if (System.Initialize(params))
 		System.Run();
 	System.Shutdown();
-	return 0;
 
 #ifdef USE_CONSOLE_COMMAND
 	CloseConsole();
 #endif
+
+	return 0;
 }

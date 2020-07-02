@@ -87,8 +87,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
     io.Fonts->AddFontFromFileTTF("fonts/Roboto-Medium.ttf", 14.0f);
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
+	
+	
     D3DSystem system;
+    Editor editor(system);
+    editor.Init();
     CreateParams params;
     params.myDevice = g_pd3dDevice;
     params.myDeviceContext = g_pd3dDeviceContext;
@@ -107,9 +110,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
             ImVec2(0, 0), ImVec2(1, 1)
         );
     };
+	params.myMessageHandlerFunction = [&](HWND hwnd, UINT uint, WPARAM wparam, LPARAM lparam) { return editor.MessageHandler(hwnd, uint, wparam, lparam); };
     system.Initialize(params);
-    Editor editor;
-    editor.Init();
 	
     // Main loop
     MSG msg;
@@ -141,7 +143,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 
         auto size = ImGui::GetWindowSize();
         system.SetResolution(size.x, size.y);
-        editor.Update(system);
+        editor.Update();
     	
         // Rendering
         ImGui::Render();

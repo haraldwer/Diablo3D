@@ -18,6 +18,7 @@ public:
 	void Shutdown();
 	bool Frame();
 	void Run();
+	static void SetInstance(D3DSystem* aInstance);
 
 	DirectX::XMINT2 GetResolution() const;
     void SetResolution(const int width, const int height);

@@ -160,6 +160,11 @@ void D3DSystem::Run()
 	}
 }
 
+void D3DSystem::SetInstance(D3DSystem* aInstance)
+{
+	instance = aInstance;
+}
+
 bool D3DSystem::Frame()
 {
 	bool result;
