@@ -12,7 +12,8 @@ Editor::Editor(D3DSystem& system) : myIsPlaying(false), myEngine(nullptr), mySys
 void Editor::Init()
 {
 	myWindows.push_back({ true, "Viewport", [&]() { mySystem.Frame(); } });
-	myWindows.push_back({ true, "Properties", [&]() {  } });
+	myWindows.push_back({ true, "Inspector", [&]() {  } });
+	myWindows.push_back({ true, "Resources", [&]() {  } });
 	myWindows.push_back({ true, "Log", [&]() { Log(); } });
 	myWindows.push_back({ true, "Services", [&]() { Services(); } });
 	Debug::Log << "Editor initialized" << std::endl;
