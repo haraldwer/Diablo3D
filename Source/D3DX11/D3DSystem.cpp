@@ -192,17 +192,8 @@ bool D3DSystem::Frame()
 LRESULT CALLBACK D3DSystem::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
 	if(m_params.myMessageHandlerFunction)
-		return m_params.myMessageHandlerFunction(hwnd, umsg, wparam, lparam);
-
-	static bool minimized = false;
-	
-	switch (umsg)
-	{
-
-	// Any other messages send to the default message handler as our application won't make use of them.
-	default:
-		return DefWindowProc(hwnd, umsg, wparam, lparam);
-	}
+		m_params.myMessageHandlerFunction(hwnd, umsg, wparam, lparam);
+	return DefWindowProc(hwnd, umsg, wparam, lparam);
 }
 
 void D3DSystem::ShutdownWindows()
@@ -226,9 +217,15 @@ void D3DSystem::ShutdownWindows()
 	ApplicationHandle = NULL;
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	switch (umessage)
+	PAINTSTRUCT ps;
+	HDC hdc;
+
+	static bool s_in_sizemove = false;
+	static bool s_minimized = false;
+
+	switch (message)
 	{
 		// Check if the window is being destroyed.
 	case WM_DESTROY:
@@ -236,12 +233,44 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 		PostQuitMessage(0);
 		return 0;
 
-	// All other messages pass to the message handler in the system class.
-	default:
-		return ApplicationHandle->MessageHandler(hwnd, umessage, wparam, lparam);
-	}
-}
+	case WM_SIZE:
+		if (wParam == SIZE_MINIMIZED)
+		{
+			if (!s_minimized)
+			{
+				s_minimized = true;
+				// Your app should probably suspend
+			}
+		}
+		else if (s_minimized)
+		{
+			s_minimized = false;
+			// Your app should resume
+		}
+		else if (!s_in_sizemove)
+			// HERE is where you'd trigger a resize based on MINIMIZE/MAXIMIZE/RESTORE
+			break;
 
+	case WM_ENTERSIZEMOVE:
+		s_in_sizemove = true;
+		break;
+
+	case WM_EXITSIZEMOVE:
+		s_in_sizemove = false;
+		// HERE is where you'd trigger a resize based on the user resizing the window
+		break;
+
+	case WM_GETMINMAXINFO:
+		{
+			// You should set a minimize window size that is reasonable for your app. Here I use 320x200
+			auto info = reinterpret_cast<MINMAXINFO*>(lParam);
+			info->ptMinTrackSize.x = 320;
+			info->ptMinTrackSize.y = 200;
+		}
+		break;
+	}
+	return ApplicationHandle->MessageHandler(hWnd, message, wParam, lParam);
+}
 
 DirectX::XMINT2 D3DSystem::GetResolution() const
 {

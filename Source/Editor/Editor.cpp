@@ -11,7 +11,12 @@ Editor::Editor(D3DSystem& system) : myIsPlaying(false), myEngine(nullptr), mySys
 
 void Editor::Init()
 {
-	myWindows.push_back({ true, "Viewport", [&]() { mySystem.Frame(); } });
+	myWindows.push_back({ true, "Viewport", [&]()
+	{
+		auto size = ImGui::GetWindowSize();
+		mySystem.SetResolution(size.x, size.y);
+		mySystem.Frame();
+	} });
 	myWindows.push_back({ true, "Inspector", [&]() {  } });
 	myWindows.push_back({ true, "Resources", [&]() {  } });
 	myWindows.push_back({ true, "Log", [&]() { Log(); } });

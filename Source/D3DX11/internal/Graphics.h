@@ -52,7 +52,7 @@ struct CreateParams
     std::function<void()> myInitFunction;
     std::function<void()> myUpdateFunction;
     std::function<void(ID3D11ShaderResourceView*)> myPresentFunction;
-    std::function<LRESULT(HWND, UINT, WPARAM, LPARAM)> myMessageHandlerFunction;
+    std::function<void(HWND, UINT, WPARAM, LPARAM)> myMessageHandlerFunction;
 	
     /* How big should the window be? */
     unsigned short myWindowWidth;

@@ -42,7 +42,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	CreateParams params;
 	params.myInitFunction = [&] { engine.Init(); };
 	params.myUpdateFunction = [&] {  engine.Update(true); };
-	//params.myMessageHandlerFunction = [&](HWND hwnd, UINT uint, WPARAM wparam, LPARAM lparam) { return engine.MessageHandler(hwnd, uint, wparam, lparam); };
+	params.myMessageHandlerFunction = [&](HWND hwnd, UINT uint, WPARAM wparam, LPARAM lparam) { engine.MessageHandler(hwnd, uint, wparam, lparam); };
 	if (System.Initialize(params))
 		System.Run();
 	System.Shutdown();

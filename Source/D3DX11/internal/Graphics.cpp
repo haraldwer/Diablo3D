@@ -85,7 +85,7 @@ bool Graphics::Initialize(const CreateParams& createParams)
 		return false;
 
 	// Initialize the debug window object.
-	result = m_RenderTextureBitmap.Initialize(m_Direct3D.GetDevice(), m_screenWidth, m_screenHeight, 100, 100);
+	result = m_RenderTextureBitmap.Initialize(m_Direct3D.GetDevice(), m_screenWidth, m_screenHeight, 0, 0);
 	if (!result)
 	{
 		Debug::Error << "Could not initialize the debug window object." << std::endl;
@@ -184,7 +184,9 @@ void Graphics::SetResolution(int width, int height)
 	{
 		m_screenWidth = width;
 		m_screenHeight = height;
-		m_Direct3D.SetResolution(width, height);
+		m_Direct3D.SetResolution(width, height, m_fullscreen, m_hwnd, SCREEN_DEPTH, SCREEN_NEAR);
+		m_RenderTexture.Shutdown();
+		m_RenderTexture.Initialize(m_Direct3D.GetDevice(), width, height);
 	}
 }
 
@@ -193,13 +195,13 @@ bool Graphics::Render()
 	DirectX::XMMATRIX worldMatrix, viewMatrix, orthoMatrix;
 	bool result;
 
-	// Render the entire scene to the texture first.
-	result = RenderToTexture();
-	if (!result)
-		return false;
-
 	if (m_createParams.myPresentFunction)
 	{
+		// Render the entire scene to the texture first.
+		result = RenderToTexture();
+		if (!result)
+			return false;
+		
 		m_createParams.myPresentFunction(m_RenderTexture.GetShaderResourceView());
 	}
 	else
@@ -211,28 +213,6 @@ bool Graphics::Render()
 		if (!result)
 			return false;
 		
-		// Turn off the Z buffer to begin all 2D rendering.
-		m_Direct3D.TurnZBufferOff();
-
-		// Get the world, view, and ortho matrices from the camera and d3d objects.
-		m_Direct3D.GetWorldMatrix(worldMatrix);
-		m_Camera.GetViewMatrix(viewMatrix);
-		m_Direct3D.GetOrthoMatrix(orthoMatrix);
-		
-		// Put the debug window vertex and index buffers on the graphics pipeline to prepare them for drawing.
-		result = m_RenderTextureBitmap.Render(m_Direct3D.GetDeviceContext(), 50, 50);
-		if (!result)
-			return false;
-		
-		// Render the debug window using the texture shader.
-		result = m_TextureShader.Render(m_Direct3D.GetDeviceContext(), m_RenderTextureBitmap.GetIndexCount(), worldMatrix, viewMatrix,
-			orthoMatrix, m_RenderTexture.GetShaderResourceView());
-		if (!result)
-			return false;
-		
-		// Turn the Z buffer back on now that all 2D rendering has completed.
-		m_Direct3D.TurnZBufferOn();
-
 		// Present the rendered scene to the screen.
 		m_Direct3D.EndScene();
 		
@@ -357,11 +337,6 @@ bool Graphics::RenderToTexture()
 
 Bitmap* Graphics::CreateBitmap()
 {
-	//auto itr = m_Bitmaps.find(filePath);
-	//if(itr != m_Bitmaps.end())
-	//{
-	//	return itr->second;
-	//}
 	auto bitmap = new Bitmap;
 	bool result = bitmap->Initialize(m_Direct3D.GetDevice(), m_Direct3D.GetDeviceContext());
 	if (!result)

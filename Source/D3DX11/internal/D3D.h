@@ -13,6 +13,8 @@ public:
 	D3D();
 
 	bool Initialize(ID3D11Device*, ID3D11DeviceContext*, IDXGISwapChain*, ID3D11RenderTargetView* , int, int, bool, HWND, bool, float, float);
+	bool CreateDescriptions();
+	bool CreateResources(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen, float screenDepth, float screenNear);
 	void Shutdown();
 
 	void BeginScene(float, float, float, float) const;
@@ -37,7 +39,7 @@ public:
 	void SetBackBufferRenderTarget();
 	
 	void SetFullscreen(const bool aFullscreen);
-	void SetResolution(int aWidth, int aHeight);
+	void SetResolution(int aWidth, int aHeight, bool aFullscreen, HWND aHwnd, float aScreenDepth, float aScreenNear);
 
 
 private:

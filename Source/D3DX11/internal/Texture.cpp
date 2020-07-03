@@ -25,7 +25,10 @@ bool Texture::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContex
 	// Load targa image
 	result = LoadTarga(filename, height, width);
 	if (!result)
+	{
+		
 		return false;
+	}
 
 	textureDesc.Height = height;
 	textureDesc.Width = width;

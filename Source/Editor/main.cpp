@@ -107,7 +107,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
         ImGui::GetWindowDrawList()->AddImage(
             resource,
             ImGui::GetCursorScreenPos(),
-            ImVec2(first.x + second.x, first.y + second.y),
+            ImVec2(first.x + second.x - 2, first.y + second.y - 2),
             ImVec2(0, 0), ImVec2(1, 1)
         );
     };
@@ -142,9 +142,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 
         
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-
-        auto size = ImGui::GetWindowSize();
-        system.SetResolution(size.x, size.y);
         editor.Update();
     	
         // Rendering
