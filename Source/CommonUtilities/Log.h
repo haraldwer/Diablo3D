@@ -7,39 +7,52 @@
 
 namespace Debug
 {
-	class Logger
+	class Logger : public std::ostream
 	{
+		friend class LoggerBuff;
+	public:
 		struct Entry
 		{
 			time_t time;
 			std::string message;
 		};
 		
-	public:
-		template<class T>
-		std::ostream & operator << (const T & value)
+		// Write a stream buffer that prefixes each line with Plop
+		class LoggerBuff : public std::stringbuf
 		{
-			static std::stringstream str;
-			str << value;
-			if(true)
-			{
-				Entry log;
-				log.time = std::time(0);
-				log.message = str.str();
-				myLogs.push_back(log);
-				str.clear();
-			}
-			std::cout << value;
-			return myStream << value;
-		}
+		public:
+			LoggerBuff(Logger* anOwner, std::ostream& str);
+			virtual ~LoggerBuff();
+			virtual int sync();
+			void putOutput();
 
-		std::string GetString() const;
-		std::vector<Entry>& Get();
+		private:
+			std::ostream& output;
+			Logger* myOwner;
+		};
+
+		enum class LogType
+		{
+			Log,
+			Warning,
+			Error
+		};
+		
+		Logger(LogType type, std::ostream& str);
+		std::vector<Entry>& Get() const;
+		LogType GetType() const;
 		
 	private:
-		std::stringstream myStream;
-		std::vector<Entry> myLogs;
+		LoggerBuff buffer;
+		const LogType myType;
+		static std::vector<Entry> myLogs;
+		static std::vector<Entry> myWarnings;
+		static std::vector<Entry> myErrors;
 	};
-	
-	static Logger Log;
+
+	static Logger Log(Logger::LogType::Log, std::cout);
+	static Logger Warning(Logger::LogType::Warning, std::cout);
+	static Logger Error(Logger::LogType::Error, std::cout);
 }
+
+

@@ -12,6 +12,7 @@
 #include <tchar.h>
 
 #include "Editor.h"
+#include "../CommonUtilities/Log.h"
 #include "../D3DX11/D3DSystem.h"
 
 // Data
@@ -112,6 +113,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
     };
 	params.myMessageHandlerFunction = [&](HWND hwnd, UINT uint, WPARAM wparam, LPARAM lparam) { return editor.MessageHandler(hwnd, uint, wparam, lparam); };
     system.Initialize(params);
+    Debug::Log << "ImGui initialized" << std::endl;
 	
     // Main loop
     MSG msg;
@@ -158,8 +160,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
             ImGui::RenderPlatformWindowsDefault();
         }
 
-        //g_pSwapChain->Present(1, 0); // Present with vsync
-        g_pSwapChain->Present(0, 0); // Present without vsync
+        g_pSwapChain->Present(1, 0); // Present with vsync
+        //g_pSwapChain->Present(0, 0); // Present without vsync
     }
 
     // Cleanup

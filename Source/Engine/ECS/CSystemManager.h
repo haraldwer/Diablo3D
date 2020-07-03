@@ -1,34 +1,40 @@
 #pragma once
 #include <unordered_map>
 #include <vector>
-#include <typeinfo>
+#include <typeindex>
+#include "../Utility/ServiceLocator.h"
+#include "../Entity/PrefabManager.h"
 
-class CSystem;
+class CSystemBase;
 class CSystems;
+class EngineResource;
 
-class CSystemManager
+class CSystemManager : public Service<CSystemManager>
 {
-	friend class CSystem;
+	friend class CSystemBase;
 public:
 	CSystemManager();
 	~CSystemManager();
 	void Init();
 	void Update();
-	CSystem* GetSystem(const std::string& aSystemName);
-private:
+	CSystemBase* GetSystem(const std::string& aSystemName);
 	template <class T>
 	T* GetSystem();
-	static std::vector<CSystem*> mySystems;
+	std::string GetName() override { return "CS Manager"; }
+	void Editor() override;
+private:
+	static std::vector<CSystemBase*> mySystems;
 	static CSystemManager* instance;
-	std::unordered_map<std::string, CSystem*> mySystemMap;
-	std::unordered_map<size_t, CSystem*> mySystemHashMap;
+	std::unordered_map<std::string, CSystemBase*> mySystemMap;
+	std::unordered_map<std::type_index, CSystemBase*> mySystemHashMap;
 	CSystems* mySystemsClass;
+	PrefabManager myPrefabManager;
 };
 
 template <class T>
 T* CSystemManager::GetSystem()
 {
-	const size_t hash = typeid(T).hash_code();
+	const auto hash = std::type_index(typeid(T));
 	auto find = mySystemHashMap.find(hash);
 	if (find == mySystemHashMap.end())
 		return nullptr;

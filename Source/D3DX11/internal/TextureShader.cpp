@@ -1,6 +1,8 @@
 #include "TextureShader.h"
 #include <d3dcompiler.h>
 
+#include "../../CommonUtilities/Log.h"
+
 TextureShader::TextureShader():
 m_vertexShader(nullptr),
 m_pixelShader(nullptr),
@@ -73,7 +75,7 @@ bool TextureShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsF
 		}
 		else
 		{
-			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+			Debug::Error << vsFilename << ": Missing Shader File" << std::endl;
 		}
 		return false;
 	}
@@ -87,7 +89,7 @@ bool TextureShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsF
 		}
 		else
 		{
-			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+			Debug::Error << psFilename << ": Missing Shader File" << std::endl;
 		}
 		return false;
 	}
@@ -209,7 +211,7 @@ void TextureShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd
 	fout.close();
 	errorMessage->Release();
 	errorMessage = 0;
-	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+	Debug::Error << "Error compiling shader " << shaderFilename << ". Check shader-error.txt for message." << std::endl;
 }
 
 bool TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, DirectX::XMMATRIX world, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, ID3D11ShaderResourceView* texture)

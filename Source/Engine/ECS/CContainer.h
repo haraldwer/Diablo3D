@@ -4,33 +4,48 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
-#include "../Entity.h"
+#include "../Entity/Entity.h"
+#include "../CommonUtilities/Log.h"
 
 template <class CData, class CPrefabData>
 class CContainer
 {
 public:
-	// Iterates through all components and performs function on their data. Returns false if it failed
-	bool Iterate(std::function<bool(const EntityID anEntityID, CData& someData, const CPrefabData& somePrefabData)> aFunction);
-	bool IterateThread(std::function<bool(const EntityID anEntityID, CData& someData, const CPrefabData& somePrefabData)> aFunction);
-	void InsertData(const EntityID anID, const CData& someData);
+	CData& Insert(const Entity& anEntity);
 	void InsertPrefabData(const int anID, const CPrefabData& someData);
 	void RemoveData(const EntityID anID);
 	CData& GetData(const EntityID anID);
 	CPrefabData& GetPrefabData(const int anID);
+	
+	// Iterates through all components and performs function on their data. Returns false if it failed
+	bool Perform(EntityID anEntityID, std::function<bool(const EntityID anID, CData& someData, const CPrefabData& somePrefabData)> aFunction);
+	bool Iterate(std::function<bool(const EntityID anEntityID, CData& someData, const CPrefabData& somePrefabData)> aFunction);
+	bool IterateThread(std::function<bool(const EntityID anEntityID, CData& someData, const CPrefabData& somePrefabData)> aFunction);
+
+	// Mutex lockable
 	void Lock();
 	void Unlock();
+	size_t GetEntityCount();
+
 private:
 	std::mutex myMutex;
 	std::unordered_map<EntityID, CData> myData;
-	std::unordered_map<int, CPrefabData> myPrefabData;
+	std::unordered_map<EntityID, PrefabID> myPrefabIDs;
+	std::unordered_map<PrefabID, CPrefabData> myPrefabData;
 };
+
+template <class CData, class CPrefabData>
+bool CContainer<CData, CPrefabData>::Perform(EntityID anEntityID,
+	std::function<bool(const EntityID anID, CData& someData, const CPrefabData& somePrefabData)> aFunction)
+{
+	return aFunction(anEntityID, myData[anEntityID], myPrefabData[myPrefabIDs[anEntityID]]);
+}
 
 template <class CData, class CPrefabData>
 bool CContainer<CData, CPrefabData>::Iterate(std::function<bool(const EntityID anEntityID, CData& someData, const CPrefabData& somePrefabData)> aFunction)
 {
 	for (auto& it : myData)
-		if (!aFunction(it.first, it.second, myPrefabData[0]))
+		if (!aFunction(it.first, it.second, myPrefabData[myPrefabIDs[it.first]]))
 			return false;
 	return true;
 }
@@ -62,7 +77,7 @@ bool CContainer<CData, CPrefabData>::IterateThread(std::function<bool(const Enti
 				}
 				auto& entityID = itr.first;
 				auto& data = itr.second;
-				auto& prefabData = myPrefabData[0];
+				auto& prefabData = myPrefabData[myPrefabIDs[itr->first]];
 				itr++;
 				mutex.unlock();
 				if (!aFunction(entityID, data, prefabData))
@@ -80,14 +95,20 @@ bool CContainer<CData, CPrefabData>::IterateThread(std::function<bool(const Enti
 	return run;
 }
 
+
 template <class CData, class CPrefabData>
-void CContainer<CData, CPrefabData>::InsertData(const EntityID anID, const CData& someData)
+CData& CContainer<CData, CPrefabData>::Insert(const Entity& anEntity)
 {
-	myData[anID] = someData;
+	const EntityID eID = anEntity.GetID();
+	const PrefabID pID = anEntity.GetPrefabID();
+	myPrefabIDs[eID] = pID;
+	CData data = CData();
+	myData[eID] = data;
+	return myData[eID];
 }
 
 template <class CData, class CPrefabData>
-void CContainer<CData, CPrefabData>::InsertPrefabData(const int anID, const CPrefabData& someData)
+void CContainer<CData, CPrefabData>::InsertPrefabData(const PrefabID anID, const CPrefabData& someData)
 {
 	myPrefabData[anID] = someData;
 }
@@ -107,7 +128,7 @@ CData& CContainer<CData, CPrefabData>::GetData(const EntityID anID)
 }
 
 template <class CData, class CPrefabData>
-CPrefabData& CContainer<CData, CPrefabData>::GetPrefabData(const int anID)
+CPrefabData& CContainer<CData, CPrefabData>::GetPrefabData(const PrefabID anID)
 {
 	return myPrefabData[anID];
 }
@@ -122,4 +143,10 @@ template <class CData, class CPrefabData>
 void CContainer<CData, CPrefabData>::Unlock()
 {
 	myMutex.unlock();
+}
+
+template <class CData, class CPrefabData>
+size_t CContainer<CData, CPrefabData>::GetEntityCount()
+{
+	return myData.size();
 }

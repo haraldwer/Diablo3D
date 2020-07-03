@@ -2,7 +2,7 @@
 #include "../D3DX11/D3DSystem.h"
 #include "../Engine/Engine.h"
 #include <iostream>
-#include "../EngineLoader/EngineLoader.h"
+#include "../Engine/Engine.h"
 
 #define USE_CONSOLE_COMMAND
 
@@ -38,10 +38,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 #endif
 
 	D3DSystem System;
-	EngineLoader engineLoader(System, "Engine.dll");
+	Engine engine;
 	CreateParams params;
-	params.myInitFunction = [&] { engineLoader.Init(); };
-	params.myUpdateFunction = [&] { engineLoader.Update(true); };
+	params.myInitFunction = [&] { engine.Init(); };
+	params.myUpdateFunction = [&] {  engine.Update(true); };
 	//params.myMessageHandlerFunction = [&](HWND hwnd, UINT uint, WPARAM wparam, LPARAM lparam) { return engine.MessageHandler(hwnd, uint, wparam, lparam); };
 	if (System.Initialize(params))
 		System.Run();

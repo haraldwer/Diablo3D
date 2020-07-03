@@ -1,4 +1,6 @@
 #include "D3DSystem.h"
+
+#include "../CommonUtilities/Log.h"
 #include "internal/Graphics.h"
 
 D3DSystem* D3DSystem::instance = nullptr;
@@ -116,6 +118,8 @@ bool D3DSystem::Initialize(CreateParams& params)
 	m_frameCounter.Initialize();
 	m_cpuUsage.Initialize();
 	m_timer.Initialize();
+
+	Debug::Log << "D3DX11 initialized" << std::endl;
 	return true;
 }
 

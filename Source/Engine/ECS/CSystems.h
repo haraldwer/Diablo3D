@@ -1,5 +1,5 @@
 #pragma once
-#include "Internal/CModelRenderer.h"
+#include "ComponentSystems//CModelRenderer.h"
 
 class CSystems
 {	

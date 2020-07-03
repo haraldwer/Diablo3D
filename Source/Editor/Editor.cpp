@@ -2,9 +2,10 @@
 #include "imgui.h"
 #include "../D3DX11/D3DSystem.h"
 #include <iostream>
-#include "../EngineLoader/EngineLoader.h"
+#include "../Engine/Engine.h"
+#include "../CommonUtilities/Log.h"
 
-Editor::Editor(D3DSystem& system) : myEngineLoader(nullptr), myIsPlaying(false), mySystem(system)
+Editor::Editor(D3DSystem& system) : myIsPlaying(false), myEngine(nullptr), mySystem(system)
 {
 }
 
@@ -12,40 +13,18 @@ void Editor::Init()
 {
 	myWindows.push_back({ true, "Viewport", [&]() { mySystem.Frame(); } });
 	myWindows.push_back({ true, "Properties", [&]() {  } });
-	myWindows.push_back({ true, "Log", [&]()
-	{
-		auto& logs = Debug::Log.Get();
-		static std::vector<std::string> entries;
-		for(auto& it : logs)
-			entries.push_back(it.message.c_str());
-		logs.clear();
-		
-		Debug::Logger* engineLog = myEngineLoader->GetLog();
-		if(engineLog)
-		{
-			auto& engineLogs = engineLog->Get();
-			for (auto& it : engineLogs)
-				entries.push_back(it.message.c_str());
-			engineLogs.clear();
-		}
-
-		std::vector<const char*> charArr;
-		charArr.reserve(entries.size());
-		for (auto& it : entries)
-			charArr.push_back(it.c_str());
-		
-		static int curr = 0;
-		ImGui::ListBox("", &curr, charArr.data(), charArr.size());
-	}});
+	myWindows.push_back({ true, "Log", [&]() { Log(); } });
+	myWindows.push_back({ true, "Services", [&]() { Services(); } });
 	Debug::Log << "Editor initialized" << std::endl;
 }
 
 void Editor::Update()
 {
-	if(!myEngineLoader)
+	if(!myEngine)
 	{
-		myEngineLoader = new EngineLoader(mySystem, "Engine2.dll");
-		myEngineLoader->Init();
+		myEngine = new Engine();
+		myEngine->Init();
+		Debug::Log << "Engine created" << std::endl;
 	}
 
 	ImGui::BeginMainMenuBar();
@@ -62,13 +41,16 @@ void Editor::Update()
 		myIsPlaying = !myIsPlaying;
 	if (ImGui::MenuItem("Reload"))
 	{
-		if (myEngineLoader)
-			myEngineLoader->Reload();
+		if (myEngine)
+		{
+			delete(myEngine);
+			myEngine = nullptr;
+		}
 	}
 	ImGui::EndMainMenuBar();
 
-	if (myEngineLoader)
-		myEngineLoader->Update(myIsPlaying);
+	if (myEngine)
+		myEngine->Update(myIsPlaying);
 
 	for(auto& it : myWindows)
 	{
@@ -79,6 +61,92 @@ void Editor::Update()
 				it.function();
 			}
 			ImGui::End();
+		}
+	}
+}
+
+void Editor::Log()
+{
+	static ImGuiTextBuffer     Buf;
+	static ImGuiTextFilter     Filter;
+	static ImVector<int>       LineOffsets;        // Index to lines offset
+	static bool                ScrollToBottom;
+
+	AddLogs(Debug::Error, ScrollToBottom, Buf, LineOffsets);
+	AddLogs(Debug::Warning, ScrollToBottom, Buf, LineOffsets);
+	AddLogs(Debug::Log, ScrollToBottom, Buf, LineOffsets);
+
+	if (ImGui::Button("Clear"))
+	{
+		Buf.clear();
+		LineOffsets.clear();
+	}
+	ImGui::SameLine();
+	bool copy = ImGui::Button("Copy");
+	ImGui::SameLine();
+	Filter.Draw("Filter", -100.0f);
+	ImGui::Separator();
+	ImGui::BeginChild("scrolling");
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 1));
+	if (copy) ImGui::LogToClipboard();
+
+	if (Filter.IsActive())
+	{
+		const char* buf_begin = Buf.begin();
+		const char* line = buf_begin;
+		for (int line_no = 0; line != NULL; line_no++)
+		{
+			const char* line_end = (line_no < LineOffsets.Size) ? buf_begin + LineOffsets[line_no] : NULL;
+			if (Filter.PassFilter(line, line_end))
+				ImGui::TextUnformatted(line, line_end);
+			line = line_end && line_end[1] ? line_end + 1 : NULL;
+		}
+	}
+	else
+	{
+		ImGui::TextUnformatted(Buf.begin());
+	}
+
+	if (ScrollToBottom)
+		ImGui::SetScrollHere(1.0f);
+	ScrollToBottom = false;
+	ImGui::PopStyleVar();
+	ImGui::EndChild();
+}
+
+void Editor::AddLogs(Debug::Logger& logger, bool& ScrollToBottom, ImGuiTextBuffer& Buf, ImVector<int>& LineOffsets)
+{
+	auto& logs = logger.Get();
+	if (!logs.empty())
+	{
+		for (auto& it : logs)
+		{
+			int old_size = Buf.size();
+			Buf.append(it.message.c_str());
+			Buf.append("\n");
+			for (int new_size = Buf.size(); old_size < new_size; old_size++)
+				if (Buf[old_size] == '\n')
+					LineOffsets.push_back(old_size);
+		}
+		ScrollToBottom = true;
+		logs.clear();
+	}
+}
+
+void Editor::Services()
+{
+	if (!myEngine)
+		return;
+	
+	static int curr = 0;
+	std::vector<const char*> serviceNames;
+	auto& services = ServiceLocator::Instance().GetServices();
+	for(auto& it : services)
+	{
+		auto& service = *(it.second);
+		if(ImGui::CollapsingHeader(service.GetName().c_str()))
+		{
+			service.Editor();
 		}
 	}
 }

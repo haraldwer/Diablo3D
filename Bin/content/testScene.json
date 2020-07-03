@@ -1,0 +1,9 @@
+{
+	"Name":"TEST_SCENE",
+	"Type":"SCENE",
+	"ID":3,
+	"Ext":"json",
+	"Entities":[{
+		"Prefab":0
+	}]
+}

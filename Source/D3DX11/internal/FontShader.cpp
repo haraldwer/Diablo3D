@@ -3,6 +3,8 @@
 #include <d3dcompiler.h>
 #include <fstream>
 
+#include "../../CommonUtilities/Log.h"
+
 FontShader::FontShader():
 m_vertexShader(nullptr),
 m_pixelShader(nullptr),
@@ -78,7 +80,7 @@ bool FontShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFile
 		}
 		else
 		{
-			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+			Debug::Error << vsFilename << ": Missing Shader File" << std::endl;
 		}
 		return false;
 	}
@@ -92,7 +94,7 @@ bool FontShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFile
 		}
 		else
 		{
-			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+			Debug::Error << psFilename << ": Missing Shader File" << std::endl;
 		}
 		return false;
 	}
@@ -267,7 +269,7 @@ void FontShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, W
 	errorMessage = 0;
 
 	// Pop a message up on the screen to notify the user to check the text file for compile errors.
-	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
+	Debug::Error << "Error compiling shader " << shaderFilename << ". Check shader-error.txt for message." << std::endl;
 }
 
 bool FontShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, DirectX::XMMATRIX world, DirectX::XMMATRIX view, DirectX::XMMATRIX projection,

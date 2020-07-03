@@ -1,5 +1,7 @@
 #include "Text.h"
 
+#include "../../CommonUtilities/Log.h"
+
 Text::Text():
 m_Font(nullptr),
 m_FontShader(nullptr),
@@ -25,7 +27,7 @@ bool Text::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	result = m_Font->Initialize(device, deviceContext, "content/fontdata.txt", "content/font.tga");
 	if(!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the font object.", L"Error", MB_OK);
+		Debug::Error << "Could not initialize the font object." << std::endl;
 		return false;
 	}
 
@@ -36,7 +38,7 @@ bool Text::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, 
 	result = m_FontShader->Initialize(device, hwnd);
 	if(!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the font shader object.", L"Error", MB_OK);
+		Debug::Error << "Could not initialize the font shader object." << std::endl;
 		return false;
 	}
 

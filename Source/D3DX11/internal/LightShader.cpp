@@ -3,6 +3,8 @@
 #include <fstream>
 #include <d3dcompiler.h>
 
+#include "../../CommonUtilities/Log.h"
+
 LightShader::LightShader():
 	m_vertexShader(nullptr),
 	m_pixelShader(nullptr),
@@ -73,7 +75,8 @@ bool LightShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFil
 		}
 		else
 		{
-			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+			Debug::Error << vsFilename << ": Missing Shader File" << std::endl;
+			
 		}
 		return false;
 	}
@@ -87,7 +90,7 @@ bool LightShader::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFil
 		}
 		else
 		{
-			MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+			Debug::Error << psFilename << ": Missing Shader File" << std::endl;
 		}
 		return false;
 	}
@@ -264,9 +267,7 @@ void LightShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, 
 	errorMessage = 0;
 
 	// Pop a message up on the screen to notify the user to check the text file for compile errors.
-	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
-
-	return;
+	Debug::Error << "Error compiling shader " << shaderFilename << ". Check shader-error.txt for message." << std::endl;
 }
 
 bool LightShader::SetShaderParameteres(ID3D11DeviceContext* deviceContext, DirectX::XMMATRIX world, DirectX::XMMATRIX view, DirectX::XMMATRIX projection, ID3D11ShaderResourceView* texture, DirectX::XMFLOAT3 lightDirection, DirectX::XMFLOAT4 ambientColor, DirectX::XMFLOAT4 diffuseColor, DirectX::XMFLOAT3 cameraPosition, DirectX::XMFLOAT4 specularColor, float specularPower)

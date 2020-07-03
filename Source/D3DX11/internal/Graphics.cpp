@@ -9,6 +9,7 @@
 
 #include "../D3DModel.h"
 #include "../D3DSprite.h"
+#include "../../CommonUtilities/Log.h"
 
 Graphics::Graphics():
 	m_hwnd(nullptr),
@@ -35,7 +36,7 @@ bool Graphics::Initialize(const CreateParams& createParams)
 	result = m_Direct3D.Initialize(createParams.myDevice, createParams.myDeviceContext, createParams.mySwapChain, createParams.myRTView, m_screenWidth, m_screenHeight, createParams.myEnableVSync, m_hwnd, m_fullscreen, SCREEN_DEPTH, SCREEN_NEAR);
 	if (!result)
 	{
-		MessageBox(m_hwnd, L"Could not initialize Direct3D", L"Error", MB_OK);
+		Debug::Error << "Could not initialize Direct3D" << std::endl;
 		return false;
 	}
 
@@ -51,7 +52,7 @@ bool Graphics::Initialize(const CreateParams& createParams)
 	result = m_Text->Initialize(m_Direct3D.GetDevice(), m_Direct3D.GetDeviceContext(), m_hwnd, m_screenWidth, m_screenHeight, baseViewMatrix);
 	if (!result)
 	{
-		MessageBox(m_hwnd, L"Could not initialize the text object", L"Error", MB_OK);
+		Debug::Error << "Could not initialize the text object" << std::endl;
 		return false;
 	}
 	
@@ -59,7 +60,7 @@ bool Graphics::Initialize(const CreateParams& createParams)
 	result = m_LightShader.Initialize(m_Direct3D.GetDevice(), m_hwnd);
 	if (!result)
 	{
-		MessageBox(m_hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
+		Debug::Error << "Could not initialize the light shader object." << std::endl;
 		return false;
 	}
 
@@ -67,7 +68,7 @@ bool Graphics::Initialize(const CreateParams& createParams)
 		result = m_ColorShader.Initialize(m_Direct3D.GetDevice(), m_hwnd);
 	if (!result)
 	{
-		MessageBox(m_hwnd, L"Could not initialize the color shader object.", L"Error", MB_OK);
+		Debug::Error << "Could not initialize the color shader object." << std::endl;
 		return false;
 	}
 	
@@ -87,7 +88,7 @@ bool Graphics::Initialize(const CreateParams& createParams)
 	result = m_RenderTextureBitmap.Initialize(m_Direct3D.GetDevice(), m_screenWidth, m_screenHeight, 100, 100);
 	if (!result)
 	{
-		MessageBox(m_hwnd, L"Could not initialize the debug window object.", L"Error", MB_OK);
+		Debug::Error << "Could not initialize the debug window object." << std::endl;
 		return false;
 	}
 	
@@ -95,7 +96,7 @@ bool Graphics::Initialize(const CreateParams& createParams)
 	result = m_TextureShader.Initialize(m_Direct3D.GetDevice(), m_hwnd);
 	if (!result)
 	{
-		MessageBox(m_hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		Debug::Error << "Could not initialize the texture shader object." << std::endl;
 		return false;
 	}
 	
@@ -365,7 +366,7 @@ Bitmap* Graphics::CreateBitmap()
 	bool result = bitmap->Initialize(m_Direct3D.GetDevice(), m_Direct3D.GetDeviceContext());
 	if (!result)
 	{
-		MessageBox(m_hwnd, L"Could not initialize bitmap object", L"Error", MB_OK);
+		Debug::Error << "Could not initialize bitmap object" << std::endl;
 		return nullptr;
 	}
 	m_Bitmaps.push_back(bitmap);
@@ -383,7 +384,7 @@ Model* Graphics::CreateModel(const char* filePath)
 	bool result = model->Initialize(m_Direct3D.GetDevice(), m_Direct3D.GetDeviceContext(), filePath);
 	if (!result)
 	{
-		MessageBox(m_hwnd, L"Could not initialize model object", L"Error", MB_OK);
+		Debug::Error << "Could not initialize model object" << std::endl;
 		return nullptr;
 	}
 	m_Models[filePath] = model;
@@ -401,7 +402,7 @@ Texture* Graphics::CreateTexture(const char* filePath)
 	bool result = texture->Initialize(m_Direct3D.GetDevice(), m_Direct3D.GetDeviceContext(), filePath);
 	if (!result)
 	{
-		MessageBox(m_hwnd, L"Could not initialize model object", L"Error", MB_OK);
+		Debug::Error << "Could not initialize model object" << std::endl;
 		return nullptr;
 	}
 	m_Textures[filePath] = texture;
