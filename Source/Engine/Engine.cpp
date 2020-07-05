@@ -1,10 +1,16 @@
 #include "Engine.h"
 
+Engine::~Engine()
+{
+	myPhysicsManager.Shutdown();
+}
+
 void Engine::Init()
 {
 	myResourceManager.LoadResources("content");
-	mySceneManager.Init();
+	myPhysicsManager.Init();
 	myComponentManager.Init();
+	mySceneManager.Init();
 	mySceneManager.LoadScene(3);
 }
 

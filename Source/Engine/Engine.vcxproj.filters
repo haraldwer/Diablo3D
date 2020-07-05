@@ -66,6 +66,9 @@
     <ClInclude Include="Entity\PrefabManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Physics\PhysicsManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Engine.rc">
@@ -113,6 +116,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Entity\Prefab.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics\PhysicsManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

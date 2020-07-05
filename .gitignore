@@ -28,5 +28,14 @@
 *.out
 *.app
 
+# Debug files
+*.ilk
+*.pdb
+
 Source/.vs
 Temp/
+Lib/CommonUtilities_Debug.lib
+Lib/D3DX11_Debug.lib
+Lib/Engine_Debug.lib
+Lib/ImGui_Debug.lib
+Lib/RapidJSON_Debug.lib
