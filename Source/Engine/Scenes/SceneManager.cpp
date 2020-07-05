@@ -1,6 +1,10 @@
 #include "SceneManager.h"
+
+#include "Horspool.hpp"
 #include "Engine/EngineResources/ResourceManager.h"
+#include "Engine/Physics/PhysicsManager.h"
 #include "RapidJSON/document.h"
+#include "ImGui/imgui.h"
 
 void SceneManager::Init()
 {
@@ -60,6 +64,12 @@ SceneID SceneManager::LoadScene(EngineResource* aSceneResource)
 	}
 
 	const SceneID id = aSceneResource->myID;
+	if(myScenes.find(id) != myScenes.end())
+	{
+		Debug::Warning << path << " : Scene already loaded";
+		return -1;
+	}
+	
 	Scene* scene = new Scene(id, path);
 	myScenes[id] = scene;
 	int c = 0;
@@ -78,3 +88,36 @@ SceneID SceneManager::LoadScene(EngineResource* aSceneResource)
 	return id;
 }
 
+bool SceneManager::UnloadScene(const std::string& aScene)
+{
+	for (auto& it : myScenes)
+		if (CommonUtilities::Horspool(aScene, it.second->GetPath()) != -1)
+			UnloadScene(it.second->GetID());
+	return false;
+}
+
+bool SceneManager::UnloadScene(SceneID aSceneID)
+{
+	if(myScenes.find(aSceneID) == myScenes.end() || myScenes[aSceneID] == nullptr)
+	{
+		Debug::Warning << "Scene already destroyed. SceneID: " << aSceneID << std::endl;
+		return false;
+	}
+	ServiceLocator::Instance().GetService<PhysicsManager>().DestroyScene(aSceneID);
+	delete myScenes[aSceneID];
+	myScenes[aSceneID] == nullptr;
+	return true;
+}
+
+void SceneManager::Editor()
+{
+	ImGui::Text("Loaded scenes: ");
+	ImGui::Separator();
+	ImGui::BeginChild("SceneManager editor");
+	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 1));
+	for (auto& it : myScenes)
+		if (it.second)
+			ImGui::Text((it.second->GetPath()).c_str());
+	ImGui::PopStyleVar();
+	ImGui::EndChild();
+}

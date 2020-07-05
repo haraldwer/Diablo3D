@@ -17,6 +17,7 @@ void Engine::Init()
 void Engine::Update(bool run)
 {
 	myComponentManager.Update();
+	myPhysicsManager.Update();
 }
 
 void Engine::MessageHandler(HWND hwnd, UINT message, WPARAM wparam, LPARAM lparam)

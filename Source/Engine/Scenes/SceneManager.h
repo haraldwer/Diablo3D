@@ -8,7 +8,10 @@ public:
 	void Init();
 	SceneID LoadScene(std::string aScene);
 	SceneID LoadScene(ResourceID aSceneID);
+	bool UnloadScene(const std::string& aScene);
+	bool UnloadScene(SceneID aSceneID);
 	std::string GetName() override { return "Scene Manager"; }
+	void Editor() override;
 private:
 	SceneID LoadScene(EngineResource* aSceneResource);
 	std::unordered_map<SceneID, Scene*> myScenes;
