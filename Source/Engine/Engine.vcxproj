@@ -192,6 +192,7 @@
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Entity\Prefab.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Utility\Input.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="EngineResources\ResourceManager.h" />
     <ClInclude Include="Entity\PrefabManager.h" />
@@ -199,6 +200,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scenes\Scene.h" />
     <ClInclude Include="Scenes\SceneManager.h" />
+    <ClInclude Include="Entity\Transform.h" />
     <ClInclude Include="Utility\ServiceLocator.h" />
   </ItemGroup>
   <ItemGroup>
@@ -227,12 +229,14 @@
     <ClCompile Include="EngineResources\EngineResource.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Entity\Prefab.cpp" />
+    <ClCompile Include="Utility\Input.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="EngineResources\ResourceManager.cpp" />
     <ClCompile Include="Entity\PrefabManager.cpp" />
     <ClCompile Include="Physics\PhysicsManager.cpp" />
     <ClCompile Include="Scenes\Scene.cpp" />
     <ClCompile Include="Scenes\SceneManager.cpp" />
+    <ClCompile Include="Entity\Transform.cpp" />
     <ClCompile Include="Utility\ServiceLocator.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

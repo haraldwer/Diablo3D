@@ -164,6 +164,21 @@ void D3DSystem::Run()
 	}
 }
 
+void D3DSystem::GetView(float* matrix)
+{
+	return m_Graphics.GetView(matrix);
+}
+
+void D3DSystem::GetProjection(float* matrix)
+{
+	return m_Graphics.GetProjection(matrix);
+}
+
+Camera& D3DSystem::GetCamera()
+{
+	return m_Graphics.GetCamera();
+}
+
 void D3DSystem::SetInstance(D3DSystem* aInstance)
 {
 	instance = aInstance;

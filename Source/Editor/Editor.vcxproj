@@ -184,11 +184,19 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Inspector\CommandQueue.cpp" />
     <ClCompile Include="Editor.cpp" />
+    <ClCompile Include="Inspector\Gizmo.cpp" />
+    <ClCompile Include="Inspector\Inspector.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Viewport.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Inspector\CommandQueue.h" />
     <ClInclude Include="Editor.h" />
+    <ClInclude Include="Inspector\Gizmo.h" />
+    <ClInclude Include="Inspector\Inspector.h" />
+    <ClInclude Include="Viewport.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

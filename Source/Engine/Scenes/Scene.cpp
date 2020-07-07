@@ -30,6 +30,7 @@ Entity* Scene::CreateEntity(PrefabID aPrefabID)
 			return nullptr;
 		}
 	}
+	myObjectPool[myLatestIndex].myInUse = true;
 	myObjectPool[myLatestIndex].myObject.Construct(myLatestIndex, aPrefabID);
 	Entity* entity = &myObjectPool[myLatestIndex].myObject;
 	CSystemManager& systemManager = ServiceLocator::Instance().GetService<CSystemManager>();
@@ -51,7 +52,7 @@ Entity* Scene::GetEntity(const EntityID anID)
 {
 	if (anID < 0 || anID >= poolSize || !myObjectPool[anID].myInUse)
 	{
-		Debug::Warning << "Invalid ID" << std::endl;
+		Debug::Warning << "Invalid entity ID" << std::endl;
 		return nullptr;
 	}
 	return &myObjectPool[anID].myObject;

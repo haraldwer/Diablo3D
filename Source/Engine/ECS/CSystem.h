@@ -3,6 +3,7 @@
 #include "CSystemManager.h"
 #include <typeindex>
 #include "../Entity/Prefab.h"
+#include "Engine/Entity/Entity.h"
 #include "RapidJSON/document.h"
 
 class Entity;
@@ -23,6 +24,7 @@ private:
 	virtual void Init() = 0;
 	virtual void Update() = 0;
 	virtual void AddEntity(Entity * anEntity) = 0;
+	virtual void RemoveEntity(EntityID anEntityID) = 0;
 	virtual void LoadPrefab(PrefabID, const rapidjson::GenericObject<false, rapidjson::Value>& aBase) = 0;
 	virtual std::string GetSystemName() = 0;
 	virtual std::type_index GetTypeIndex() = 0;

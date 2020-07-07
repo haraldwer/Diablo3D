@@ -19,6 +19,10 @@ public:
 	
 private:
 	physx::PxRigidDynamic*			CreateDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, SceneID scene);
+	physx::PxRigidStatic*			CreateStatic(const physx::PxTransform& t, const physx::PxGeometry& geometry, SceneID scene);
+
+	void DestroyRigidbody(physx::PxActor* rb, SceneID scene);
+	
 	physx::PxDefaultAllocator		myAllocator;
 	physx::PxDefaultErrorCallback	myErrorCallback;
 	physx::PxFoundation*			myFoundation;

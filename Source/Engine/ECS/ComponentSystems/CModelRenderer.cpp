@@ -15,8 +15,16 @@ void CModelRenderer::Update()
 {
 	myContainer.Iterate([&](const EntityID anID, Data& someData, const PrefabData& somePrefabData)
 	{
-		if (someData.myModel)
+		if (someData.myModel && someData.myEntity)
+		{
+			const Vec3F pos = someData.myEntity->GetTransform().GetPosition();
+			const Vec3F rot = someData.myEntity->GetTransform().GetRotation();
+			const Vec3F scale = someData.myEntity->GetTransform().GetScale();
+			someData.myModel->SetPosition(pos.x, pos.y, pos.z);
+			someData.myModel->SetRotation(rot.x, rot.y, rot.z);
+			someData.myModel->SetScale(scale.x, scale.y, scale.z);
 			someData.myModel->Render();
+		}
 		return true;
 	});
 }
@@ -25,7 +33,8 @@ void CModelRenderer::AddEntity(Entity* anEntity)
 {
 	if (anEntity)
 	{
-		myContainer.Insert(*anEntity);
+		Data& data = myContainer.Insert(*anEntity);
+		data.myEntity = anEntity;
 		myContainer.Perform(anEntity->GetID(), [&](const EntityID anID, Data& someData, const PrefabData& somePrefabData)
 		{
 			ResourceManager& resourceManager = ServiceLocator::Instance().GetService<ResourceManager>();
@@ -58,6 +67,11 @@ void CModelRenderer::AddEntity(Entity* anEntity)
 
 		});
 	}
+}
+
+void CModelRenderer::RemoveEntity(EntityID anEntityID)
+{
+	myContainer.RemoveData(anEntityID);
 }
 
 void CModelRenderer::LoadPrefab(PrefabID aPrefabID, const rapidjson::GenericObject<false, rapidjson::Value>& aBase)

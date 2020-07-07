@@ -252,10 +252,11 @@ bool Graphics::RenderScene()
 				// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 				model->Render(m_Direct3D.GetDeviceContext());
 
-				const auto world = worldMatrix * 
-					DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z) * 
-					DirectX::XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) * 
-					DirectX::XMMatrixScaling(scale.x, scale.y, scale.z);
+				const auto world =
+					DirectX::XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) *
+					DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
+					DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z) *
+					worldMatrix;
 
 				if(texture)
 				{
@@ -394,4 +395,46 @@ void Graphics::RenderBitmap(D3DSprite* bitmap)
 {
 	if (bitmap)
 		m_BitmapCalls.push_back(bitmap);
+}
+
+void CopyMatrix(float* target, DirectX::XMMATRIX& matrix)
+{
+	target[0] = matrix.r[0].m128_f32[0];
+	target[1] = matrix.r[0].m128_f32[1];
+	target[2] = matrix.r[0].m128_f32[2];
+	target[3] = matrix.r[0].m128_f32[3];
+	
+	target[4] = matrix.r[1].m128_f32[0];
+	target[5] = matrix.r[1].m128_f32[1];
+	target[6] = matrix.r[1].m128_f32[2];
+	target[7] = matrix.r[1].m128_f32[3];
+	
+	target[8] = matrix.r[2].m128_f32[0];
+	target[9] = matrix.r[2].m128_f32[1];
+	target[10] = matrix.r[2].m128_f32[2];
+	target[11] = matrix.r[2].m128_f32[3];
+	
+	target[12] = matrix.r[3].m128_f32[0];
+	target[13] = matrix.r[3].m128_f32[1];
+	target[14] = matrix.r[3].m128_f32[2];
+	target[15] = matrix.r[3].m128_f32[3];
+}
+
+void Graphics::GetView(float* matrix) const
+{
+	DirectX::XMMATRIX view;
+	m_Camera.GetViewMatrix(view);
+	CopyMatrix(matrix, view);
+}
+
+void Graphics::GetProjection(float* matrix) const
+{
+	DirectX::XMMATRIX projection;
+	m_Direct3D.GetProjectionMatrix(projection);
+	CopyMatrix(matrix, projection);
+}
+
+Camera& Graphics::GetCamera()
+{
+	return m_Camera;
 }

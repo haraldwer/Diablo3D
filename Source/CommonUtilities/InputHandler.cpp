@@ -76,8 +76,10 @@ bool InputHandler::UpdateEvents(const UINT aMessage, const WPARAM aWParam, const
 	case WM_MBUTTONUP:
 		myButtonStates[static_cast<int>(Button::MOUSE_MIDDLE)] = KeyState::RELEASED;
 		break;
+	default:
+		return false;
 	}
-	return false;
+	return true;
 }
 
 void InputHandler::Init()

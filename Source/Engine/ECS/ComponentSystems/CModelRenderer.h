@@ -9,6 +9,7 @@ class CModelRenderer : public CSystem<CModelRenderer>
 {
 	struct Data
 	{
+		Entity* myEntity;
 		D3DModel* myModel;
 	};
 	struct PrefabData
@@ -18,11 +19,12 @@ class CModelRenderer : public CSystem<CModelRenderer>
 	};
 	
 public:
-	std::string GetSystemName() override { return "Model Renderer"; }
+	std::string GetSystemName() override { return "MODEL_RENDERER"; }
 private:
 	void Init() override;
 	void Update() override;
 	void AddEntity(Entity* anEntity) override;
+	void RemoveEntity(EntityID anEntityID) override;
 	void LoadPrefab(PrefabID aPrefabID, const rapidjson::GenericObject<false, rapidjson::Value>& aBase) override;
 	size_t GetEntityCount() override;
 	CContainer<Data, PrefabData> myContainer;

@@ -41,8 +41,11 @@ void PhysicsManager::Shutdown()
 		}
 	}
 	myScenes.clear();
-	myDispatcher->release();
-	myDispatcher = nullptr;
+	if(myDispatcher)
+	{
+		myDispatcher->release();
+		myDispatcher = nullptr;
+	}
 	myPhysics->release();
 	myPhysics = nullptr;
 	if (myPvd)
@@ -59,14 +62,42 @@ void PhysicsManager::Shutdown()
 
 physx::PxRigidDynamic* PhysicsManager::CreateDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, SceneID scene)
 {
-	if(myScenes[scene])
+	if(!myScenes[scene])
 	{
-		physx::PxRigidDynamic* dynamic = PxCreateDynamic(*myPhysics, t, geometry, *myMaterial, 10.0f);
-		dynamic->setAngularDamping(0.5f);
-		myScenes[scene]->addActor(*dynamic);
-		return dynamic;
+		Debug::Error << "Unable to create dynamic, PhysicsScene with ID " << scene << " does not exist" << std::endl;
+		return nullptr;
 	}
-	return nullptr;
+	physx::PxRigidDynamic* dynamic = PxCreateDynamic(*myPhysics, t, geometry, *myMaterial, 10.0f);
+	dynamic->setAngularDamping(0.5f);
+	myScenes[scene]->addActor(*dynamic);
+	return dynamic;
+}
+
+physx::PxRigidStatic* PhysicsManager::CreateStatic(const physx::PxTransform& t, const physx::PxGeometry& geometry, SceneID scene)
+{
+	if (!myScenes[scene])
+	{
+		Debug::Error << "Unable to create dynamic, PhysicsScene with ID " << scene << " does not exist" << std::endl;
+		return nullptr;
+	}
+	physx::PxRigidStatic* rb = physx::PxCreateStatic(*myPhysics, t, geometry, *myMaterial);
+	myScenes[scene]->addActor(*rb);
+	return rb;
+}
+
+void PhysicsManager::DestroyRigidbody(physx::PxActor* rb, SceneID scene)
+{
+	if (!rb)
+		return;
+	if (!myScenes[scene])
+	{
+		Debug::Error << "Cannot remove dynamic from scene which does not exist. SceneID: " << scene << std::endl;
+	}
+	else
+	{
+		myScenes[scene]->removeActor(*rb);
+	}
+	rb->release();
 }
 
 void PhysicsManager::CreateScene(SceneID aSceneID)

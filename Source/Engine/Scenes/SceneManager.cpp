@@ -30,6 +30,24 @@ SceneID SceneManager::LoadScene(ResourceID sceneID)
 	return LoadScene(resource);
 }
 
+Vec3F LoadVec(const char* name, const rapidjson::GenericObject<false, rapidjson::Value>& aBase)
+{
+	Vec3F vec;
+	if(aBase.HasMember(name) && aBase[name].IsObject())
+	{
+		if (aBase[name].HasMember("x"))
+			if(aBase[name]["x"].IsFloat() || aBase[name]["x"].IsInt())
+				vec.x = aBase[name]["x"].GetFloat();
+		if (aBase[name].HasMember("y"))
+			if (aBase[name]["y"].IsFloat() || aBase[name]["x"].IsInt())
+				vec.y = aBase[name]["y"].GetFloat();
+		if (aBase[name].HasMember("z"))
+			if (aBase[name]["z"].IsFloat() || aBase[name]["x"].IsInt())
+				vec.z = aBase[name]["z"].GetFloat();
+	}
+	return vec;
+}
+
 SceneID SceneManager::LoadScene(EngineResource* aSceneResource)
 {
 	if (!aSceneResource)
@@ -82,7 +100,13 @@ SceneID SceneManager::LoadScene(EngineResource* aSceneResource)
 		}
 		
 		const auto e = scene->CreateEntity(it["Prefab"].GetInt());
-		if (e) c++;
+		if (e)
+		{
+			e->GetTransform().SetPosition(LoadVec("Position", it.GetObject()));
+			e->GetTransform().SetRotation(LoadVec("Rotation", it.GetObject()));
+			e->GetTransform().SetScale(LoadVec("Scale", it.GetObject()));
+			c++;
+		}
 	}
 	Debug::Log << "Scene loaded, " << c << " instance" << (c > 1 ? "s" : "") << " created" << std::endl;
 	return id;
@@ -113,11 +137,21 @@ void SceneManager::Editor()
 {
 	ImGui::Text("Loaded scenes: ");
 	ImGui::Separator();
-	ImGui::BeginChild("SceneManager editor");
-	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 1));
+	ImGui::BeginChild("SceneManager editor");	ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0, 1));
 	for (auto& it : myScenes)
 		if (it.second)
 			ImGui::Text((it.second->GetPath()).c_str());
 	ImGui::PopStyleVar();
 	ImGui::EndChild();
+}
+
+Scene* SceneManager::GetScene(SceneID aSceneID)
+{
+	auto itr = myScenes.find(aSceneID);
+	if(itr == myScenes.end())
+	{
+		Debug::Error << "No scene with ID " << aSceneID << " is loaded. "<< std::endl;
+		return nullptr;
+	}
+	return itr->second;
 }

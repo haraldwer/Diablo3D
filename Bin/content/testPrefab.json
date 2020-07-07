@@ -1,10 +1,10 @@
 {
-	"Name":"TEST_PREFAB",
+	"Name":"test prefab",
 	"Type":"PREFAB",
 	"ID":0,
 	"Ext":"json",
 	"Components":[{
-			"System":"Model Renderer",
+			"System":"MODEL_RENDERER",
 			"Model":1,
 			"Texture":2
 		}

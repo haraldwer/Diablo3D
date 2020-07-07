@@ -18,6 +18,9 @@ public:
 	void Shutdown();
 	bool Frame();
 	void Run();
+	void GetView(float* matrix);
+	void GetProjection(float* matrix);
+	Camera& GetCamera();
 	static void SetInstance(D3DSystem* aInstance);
 
 	DirectX::XMINT2 GetResolution() const;

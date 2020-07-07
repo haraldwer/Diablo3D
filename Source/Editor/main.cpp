@@ -28,6 +28,8 @@ void CreateRenderTarget();
 void CleanupRenderTarget();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+Editor* editor = nullptr;
+
 // Main code
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline, int iCmdshow)
 {
@@ -91,8 +93,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	
 	
     D3DSystem system;
-    Editor editor(system);
-    editor.Init();
+    editor = new Editor(system);
+    editor->Init();
     CreateParams params;
     params.myDevice = g_pd3dDevice;
     params.myDeviceContext = g_pd3dDeviceContext;
@@ -111,7 +113,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
             ImVec2(0, 0), ImVec2(1, 1)
         );
     };
-	params.myMessageHandlerFunction = [&](HWND hwnd, UINT uint, WPARAM wparam, LPARAM lparam) { return editor.MessageHandler(hwnd, uint, wparam, lparam); };
+	params.myMessageHandlerFunction = [&](HWND hwnd, UINT uint, WPARAM wparam, LPARAM lparam) { return editor->MessageHandler(hwnd, uint, wparam, lparam); };
     system.Initialize(params);
     Debug::Log << "ImGui initialized" << std::endl;
 	
@@ -139,10 +141,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
-
+    	
+        ImGuizmo::SetOrthographic(false);
+        ImGuizmo::BeginFrame();
         
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
-        editor.Update();
+        editor->Update();
     	
         // Rendering
         ImGui::Render();
@@ -264,6 +268,10 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
             const RECT* suggested_rect = (RECT*)lParam;
             ::SetWindowPos(hWnd, NULL, suggested_rect->left, suggested_rect->top, suggested_rect->right - suggested_rect->left, suggested_rect->bottom - suggested_rect->top, SWP_NOZORDER | SWP_NOACTIVATE);
         }
+        break;
+    default:
+        if (editor)
+            editor->MessageHandler(hWnd, msg, wParam, lParam);
         break;
     }
     return ::DefWindowProc(hWnd, msg, wParam, lParam);

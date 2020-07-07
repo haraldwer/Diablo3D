@@ -1,7 +1,6 @@
 #include "Editor.h"
 #include "imgui.h"
 #include "../D3DX11/D3DSystem.h"
-#include <iostream>
 #include "../Engine/Engine.h"
 #include "../CommonUtilities/Log.h"
 
@@ -11,17 +10,14 @@ Editor::Editor(D3DSystem& system) : myIsPlaying(false), myEngine(nullptr), mySys
 
 void Editor::Init()
 {
-	myWindows.push_back({ true, "Viewport", [&]()
-	{
-		auto size = ImGui::GetWindowSize();
-		mySystem.SetResolution(size.x, size.y);
-		mySystem.Frame();
-	} });
-	myWindows.push_back({ true, "Inspector", [&]() {  } });
-	myWindows.push_back({ true, "Resources", [&]() {  } });
-	myWindows.push_back({ true, "Log", [&]() { Log(); } });
-	myWindows.push_back({ true, "Services", [&]() { Services(); } });
+	myWindows.push_back({ false, "Services",	[&]() { Services(); } });
+	myWindows.push_back({ false, "Resources",	[&]() {  } });
+	myWindows.push_back({ false, "Input",	[&]() { Input(); } });
+	myWindows.push_back({ true, "Log",			[&]() { Log(); } });
+	myWindows.push_back({ true, "Viewport",	[&]() { myViewport.Update(mySystem); } });
+	myWindows.push_back({ true, "Inspector",	[&]() { myInspector.Update(myGizmo, myEngine); } });
 	Debug::Log << "Editor initialized" << std::endl;
+	myGizmo.Init(&mySystem);
 }
 
 void Editor::Update()
@@ -33,6 +29,21 @@ void Editor::Update()
 		Debug::Log << "Engine created" << std::endl;
 	}
 
+	if (myEngine)
+		myEngine->Update(myIsPlaying);
+
+	
+	Input& input = myEngine->GetServiceLocator().GetService<Input>();
+	if(input.GetPressed(VK_F5))
+	{
+		Reload();
+		myIsPlaying = true;
+	}
+
+	CameraMovement(mySystem, input, 1);
+	
+	myGizmo.Update(input);
+	
 	ImGui::BeginMainMenuBar();
 	if(ImGui::BeginMenu("View"))
 	{
@@ -46,28 +57,30 @@ void Editor::Update()
 	if (ImGui::MenuItem(myIsPlaying ? "Stop" : "Start"))
 		myIsPlaying = !myIsPlaying;
 	if (ImGui::MenuItem("Reload"))
-	{
-		if (myEngine)
-		{
-			delete(myEngine);
-			myEngine = nullptr;
-		}
-	}
+		Reload();
 	ImGui::EndMainMenuBar();
-
-	if (myEngine)
-		myEngine->Update(myIsPlaying);
 
 	for(auto& it : myWindows)
 	{
 		if(it.open)
 		{
 			if(ImGui::Begin(it.name.c_str(), &it.open))
-			{
 				it.function();
-			}
 			ImGui::End();
 		}
+	}
+
+	if (myEngine)
+		myEngine->LateUpdate();
+}
+
+void Editor::Reload()
+{
+	if (myEngine)
+	{
+		myEngine->Shutdown();
+		delete(myEngine);
+		myEngine = nullptr;
 	}
 }
 
@@ -151,13 +164,45 @@ void Editor::Services()
 	{
 		auto& service = *(it.second);
 		if(ImGui::CollapsingHeader(service.GetName().c_str()))
-		{
 			service.Editor();
-		}
 	}
 }
 
-LRESULT Editor::MessageHandler(HWND aHwnd, UINT aUint, WPARAM aWparam, LPARAM aLparam)
+void Editor::InputMapper()
 {
+	if (!myEngine)
+		return;
+
+	Input& input = myEngine->GetServiceLocator().GetService<Input>();
+	input.Editor();
+}
+
+void Editor::CameraMovement(D3DSystem& system, Input& input, float delta)
+{
+	if (!myEngine)
+		return;
+	if (!input.GetButton(CommonUtilities::Button::MOUSE_MIDDLE))
+		return;
+	float movement[3] = {
+		input.Get('D') - input.Get('A'),
+		input.Get(VK_SHIFT) - input.Get(VK_CONTROL),
+		input.Get('W') - input.Get('S')
+	};
+	auto pos = system.GetCamera().GetPosition();
+	pos.x += movement[0] * delta;
+	pos.y += movement[1] * delta;
+	pos.z += movement[2] * delta;
+	system.GetCamera().SetPosition(pos.x, pos.y, pos.z);
+	auto rot = system.GetCamera().GetRotation();
+	Vec2F mDelta = input.GetMouseDelta();
+	rot.x += mDelta.y * 0.5f;
+	rot.y += mDelta.x * 0.5f;
+	system.GetCamera().SetRotation(rot.x, rot.y, rot.z);
+}
+
+LRESULT Editor::MessageHandler(HWND aHwnd, UINT aUint, WPARAM aWparam, LPARAM aLparam) const
+{
+	if (myEngine)
+		myEngine->MessageHandler(aHwnd, aUint, aWparam, aLparam);
 	return DefWindowProc(aHwnd, aUint, aWparam, aLparam);
 }

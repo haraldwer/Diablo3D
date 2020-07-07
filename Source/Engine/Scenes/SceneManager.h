@@ -12,6 +12,7 @@ public:
 	bool UnloadScene(SceneID aSceneID);
 	std::string GetName() override { return "Scene Manager"; }
 	void Editor() override;
+	Scene* GetScene(SceneID aSceneID);
 private:
 	SceneID LoadScene(EngineResource* aSceneResource);
 	std::unordered_map<SceneID, Scene*> myScenes;

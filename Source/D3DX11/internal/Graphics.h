@@ -94,6 +94,9 @@ public:
 
     void RenderModel(D3DModel* model);
     void RenderBitmap(D3DSprite* bitmap);
+	void GetView(float* matrix) const;
+	void GetProjection(float* matrix) const;
+	Camera& GetCamera();
 
 private:
 	
