@@ -243,21 +243,14 @@ bool Graphics::RenderScene()
 		auto texture = it->myTexture;
 		if(model)
 		{
-			const auto pos = it->myPosition;
-			const auto rot = it->myRotation;
-			const auto scale = it->myScale;
-
-			if(m_frustum.CheckPoint(pos.x, pos.y, pos.z))
+			const auto matrix = it->myMatrix;
+			const DirectX::XMFLOAT3 pos = DirectX::XMFLOAT3(matrix.r[3].m128_f32[0], matrix.r[3].m128_f32[1], matrix.r[3].m128_f32[2]);
+			
+			if(m_frustum.CheckSphere(pos.x, pos.y, pos.z, 1.0f))
 			{
 				// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 				model->Render(m_Direct3D.GetDeviceContext());
-
-				const auto world =
-					DirectX::XMMatrixRotationRollPitchYaw(rot.x, rot.y, rot.z) *
-					DirectX::XMMatrixScaling(scale.x, scale.y, scale.z) *
-					DirectX::XMMatrixTranslation(pos.x, pos.y, pos.z) *
-					worldMatrix;
-
+				const auto world = matrix * worldMatrix;
 				if(texture)
 				{
 					// Render the model using the light shader.

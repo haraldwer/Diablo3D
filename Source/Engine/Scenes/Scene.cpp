@@ -80,3 +80,12 @@ SceneID Scene::GetID() const
 {
 	return myID;
 }
+
+std::vector<EntityID> Scene::GetEntities()
+{
+	std::vector<EntityID> entities;
+	for (auto& it : myObjectPool)
+		if (it.myInUse)
+			entities.push_back(it.myObject.GetID());
+	return entities;
+}

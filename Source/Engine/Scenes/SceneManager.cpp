@@ -155,3 +155,11 @@ Scene* SceneManager::GetScene(SceneID aSceneID)
 	}
 	return itr->second;
 }
+
+std::vector<SceneID> SceneManager::GetLoadedScenes()
+{
+	std::vector<SceneID> scenes;
+	for (auto& it : myScenes)
+		scenes.push_back(it.first);
+	return scenes;
+}

@@ -18,6 +18,7 @@ public:
 	bool Get(char aKey);
 	bool GetButton(CommonUtilities::Button aButton);
 	Vec2F GetMouseDelta();
+	float GetWheelDelta();
 
 private:
 	CommonUtilities::InputHandler myInputHandler;

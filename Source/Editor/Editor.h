@@ -8,9 +8,12 @@
 #include <vector>
 
 #include "Inspector/Gizmo.h"
-#include "imgui.h"
 #include "Inspector/Inspector.h"
 #include "Viewport.h"
+#include "Hierarchy.h"
+#include "Resources/ResourceBrowser.h"
+#include "Log.h"
+#include "../CommonUtilities/Timer.h"
 
 namespace Debug {
 	class Logger;
@@ -36,19 +39,22 @@ public:
 	void Reload();
 	
 private:
-	void Log();
-	void AddLogs(Debug::Logger& logger, bool& ScrollToBottom, ImGuiTextBuffer& Buf, ImVector<int>& LineOffsets);
 	void Services();
 	void InputMapper();
 	void CameraMovement(D3DSystem& system, Input& input, float delta);
+
+	Vec3F myCameraPosition;
+	Vec3F myCameraDesiredPosition;
 	
+	CommonUtilities::Timer myTimer;
 	bool myIsPlaying;
 	Engine* myEngine;
 	std::vector<Window> myWindows;
 	D3DSystem& mySystem;
 	Gizmo myGizmo;
 	Inspector myInspector;
+	Hierarchy myHierarchy;
 	Viewport myViewport;
-	ImVec2 myViewPos;
-	ImVec2 myViewSize;
+	ResourceBrowser myResourceBrowser;
+	Log myLog;
 };

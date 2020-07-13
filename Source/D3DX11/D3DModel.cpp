@@ -1,26 +1,21 @@
 #include "D3DModel.h"
 #include "D3DSystem.h"
 
-D3DModel::D3DModel(const char* aModelPath, const char* aTexturePath): myPosition(), myRotation(), myScale(), myModel(nullptr)
+D3DModel::D3DModel(const char* aModelPath, const char* aTexturePath): myMatrix(), myModel(nullptr)
 {
 	myModel = D3DSystem::CreateModel(aModelPath);
 	myTexture = D3DSystem::CreateTexture(aTexturePath);
-	SetScale(1, 1, 1);
 }
 
-void D3DModel::SetPosition(float x, float y, float z)
+void D3DModel::SetMatrix(float* aMatrix)
 {
-	myPosition = DirectX::XMFLOAT3(x, y, z);
-}
-
-void D3DModel::SetRotation(float x, float y, float z)
-{
-	myRotation = DirectX::XMFLOAT3(x, y, z);
-}
-
-void D3DModel::SetScale(float x, float y, float z)
-{
-	myScale = DirectX::XMFLOAT3(x, y, z);
+	for(int y = 0; y < 4; y++)
+	{
+		for(int x = 0; x < 4; x++)
+		{
+			myMatrix.r[y].m128_f32[x] = aMatrix[y * 4 + x];
+		}
+	}
 }
 
 void D3DModel::Render()

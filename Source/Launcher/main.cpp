@@ -2,7 +2,6 @@
 #include "../D3DX11/D3DSystem.h"
 #include "../Engine/Engine.h"
 #include <iostream>
-#include "../Engine/Engine.h"
 
 #define USE_CONSOLE_COMMAND
 
@@ -41,7 +40,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 	Engine engine;
 	CreateParams params;
 	params.myInitFunction = [&] { engine.Init(); };
-	params.myUpdateFunction = [&] {  engine.Update(true); };
+	params.myUpdateFunction = [&]
+	{
+		engine.Update(true);
+		engine.LateUpdate();
+	};
 	params.myMessageHandlerFunction = [&](HWND hwnd, UINT uint, WPARAM wparam, LPARAM lparam) { engine.MessageHandler(hwnd, uint, wparam, lparam); };
 	if (System.Initialize(params))
 		System.Run();

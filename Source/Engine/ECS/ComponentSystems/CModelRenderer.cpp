@@ -13,16 +13,19 @@ void CModelRenderer::Init()
 
 void CModelRenderer::Update()
 {
+	float matrix[16];
 	myContainer.Iterate([&](const EntityID anID, Data& someData, const PrefabData& somePrefabData)
 	{
 		if (someData.myModel && someData.myEntity)
 		{
-			const Vec3F pos = someData.myEntity->GetTransform().GetPosition();
-			const Vec3F rot = someData.myEntity->GetTransform().GetRotation();
-			const Vec3F scale = someData.myEntity->GetTransform().GetScale();
-			someData.myModel->SetPosition(pos.x, pos.y, pos.z);
-			someData.myModel->SetRotation(rot.x, rot.y, rot.z);
-			someData.myModel->SetScale(scale.x, scale.y, scale.z);
+			//const Vec3F pos = someData.myEntity->GetTransform().GetPosition();
+			//const Vec3F rot = someData.myEntity->GetTransform().GetRotation();
+			//const Vec3F scale = someData.myEntity->GetTransform().GetScale();
+			//someData.myModel->SetPosition(pos.x, pos.y, pos.z);
+			//someData.myModel->SetRotation(rot.x, rot.y, rot.z);
+			//someData.myModel->SetScale(scale.x, scale.y, scale.z);
+			someData.myEntity->GetTransform().GetMatrix(matrix);
+			someData.myModel->SetMatrix(matrix);
 			someData.myModel->Render();
 		}
 		return true;

@@ -10,3 +10,13 @@ void Viewport::Update(D3DSystem& system)
 	system.SetResolution(mySize.x, mySize.y);
 	system.Frame();
 }
+
+ImVec2 Viewport::GetPos() const
+{
+	return myPos;
+}
+
+ImVec2 Viewport::GetSize() const
+{
+	return mySize;
+}

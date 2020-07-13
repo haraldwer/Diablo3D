@@ -81,10 +81,12 @@ void Inspector::Update(Gizmo& aGizmo, Engine* anEngine)
 		}
 	}
 	else
-	{
 		if(myIsManipulating)
-		{
 			myIsManipulating = false;
-		}
-	}
+}
+
+void Inspector::SetEntity(const SceneID aScene, const EntityID aEntity)
+{
+	mySelectedID = aEntity;
+	mySelectedScene = aScene;
 }

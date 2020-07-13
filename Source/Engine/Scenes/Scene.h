@@ -22,6 +22,7 @@ public:
 	void DestroyEntity(EntityID anID);
 	std::string GetPath() const;
 	SceneID GetID() const;
+	std::vector<EntityID> GetEntities();
 
 private:
 	const SceneID myID;

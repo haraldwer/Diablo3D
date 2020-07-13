@@ -1,5 +1,5 @@
 {
-	"Name":"test scene",
+	"Name":"testScene",
 	"Type":"SCENE",
 	"ID":3,
 	"Ext":"json",
@@ -13,6 +13,24 @@
 			"Rotation":{
 				"x":0,
 				"y":0,
+				"z":0
+			},
+			"Scale":{
+				"x":1,
+				"y":1,
+				"z":1
+			}
+		},
+		{
+			"Prefab":0,
+			"Position":{
+				"x":-3,
+				"y":-1,
+				"z":0
+			},
+			"Rotation":{
+				"x":0,
+				"y":-0.5,
 				"z":0
 			},
 			"Scale":{

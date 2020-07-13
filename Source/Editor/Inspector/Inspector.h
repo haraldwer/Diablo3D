@@ -8,8 +8,10 @@ class Inspector
 {
 public:
 	void Update(Gizmo& aGizmo, Engine* anEngine);
+	void SetEntity(const SceneID aScene, const EntityID aEntity);
+	void EditTransformProperties(Transform& aTransform);
 private:
-	Entity* GetEntity(SceneID scene, EntityID entity);
+	Entity* GetEntity(const SceneID aScene, const EntityID aEntity);
 	void EditTranform(Transform& aTransform);
 
 	

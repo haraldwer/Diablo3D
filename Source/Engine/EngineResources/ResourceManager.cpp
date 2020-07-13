@@ -9,15 +9,6 @@
 
 namespace fs = std::filesystem;
 
-std::string GetExt(const std::string& fn)
-{
-	return fn.substr(fn.find_last_of(".") + 1);
-}
-std::string ClipExt(const std::string& fn)
-{
-	return fn.substr(0, fn.find_last_of("."));
-}
-
 void ResourceManager::LoadResources(const std::string& aPath)
 {
 	Debug::Log << "Loading resources" << std::endl;
@@ -25,26 +16,56 @@ void ResourceManager::LoadResources(const std::string& aPath)
 		delete it.second;
 	myResources.clear();
 	myResourceTypeMap.clear();
-	LoadResourcesRec(aPath);
+	if(myFolder)
+	{
+		delete(myFolder);
+		myFolder = nullptr;
+	}
+	if(!myFolder)
+	{
+		myFolder = new Folder(aPath);
+	}
+	LoadResourcesRec(aPath, myFolder);
 }
 
-void ResourceManager::LoadResourcesRec(const std::string& aPath)
+void ResourceManager::LoadResourcesRec(const std::string& aPath, Folder* aFolder)
 {
+	if(!aFolder)
+	{
+		Debug::Error << "Folder was nullptr when loading resources" << std::endl;
+		return;
+	}
 	for (const auto& entry : fs::directory_iterator(aPath))
 	{
 		if (entry.is_directory())
 		{
-			LoadResourcesRec(entry.path().string());
+			Folder* f = new Folder(entry.path().string());
+			aFolder->folders.push_back(f);
+			LoadResourcesRec(entry.path().string(), f);
 			continue;
 		}
 
 		auto ext = GetExt(entry.path().string());
 		if (ext == std::string("json"))
-			LoadResource(entry.path().string());
+			LoadResource(entry.path().string(), aFolder);
+		else // If resource hasnt already been loaded
+		{
+			bool res = false;
+			for (auto& it : aFolder->resources)
+			{
+				if (ClipExt(it->myPath) == ClipExt(entry.path().string()))
+				{
+					res = true;
+					break;
+				}
+			}
+			if(!res)
+				aFolder->unloadedResources.push_back(new UnloadedResource(entry.path().string()));
+		}
 	}
 }
 
-void ResourceManager::LoadResource(const std::string& aPath)
+void ResourceManager::LoadResource(const std::string& aPath, Folder* aFolder)
 {
 	std::string doc = Parse(aPath);
 	rapidjson::Document json;
@@ -101,6 +122,15 @@ void ResourceManager::LoadResource(const std::string& aPath)
 	resource->myID = id;
 	myResources[id] = resource;
 	myResourceTypeMap[eType._to_integral()].push_back(resource);
+	aFolder->resources.push_back(resource);
+	for (int i = 0; i < aFolder->unloadedResources.size(); i++)
+	{
+		if (ClipExt(aFolder->unloadedResources[i]->path) == ClipExt(resource->myPath))
+		{
+			aFolder->unloadedResources.erase(aFolder->unloadedResources.begin() + i);
+			break;
+		}
+	}
 }
 
 EngineResource* ResourceManager::CreateResource(const std::string& aResourceName, ResourceType aType)
@@ -147,4 +177,9 @@ void ResourceManager::Editor()
 	}
 	ImGui::PopStyleVar();
 	ImGui::EndChild();
+}
+
+ResourceManager::Folder* ResourceManager::GetFolder() const
+{
+	return myFolder;
 }

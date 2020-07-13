@@ -10,17 +10,13 @@ class D3DModel
 public:
 	D3DModel() = delete;
 	D3DModel(const char* aModelPath, const char* aTexturePath);
-	void SetPosition(float x, float y, float z);
-	void SetRotation(float x, float y, float z);
-	void SetScale(float x, float y, float z);
-
+	void SetMatrix(float* aMatrix);
+	
 	// Add to render queue in D3DX11
 	void Render();
 	
 private:
-	DirectX::XMFLOAT3 myPosition;
-	DirectX::XMFLOAT3 myRotation;
-	DirectX::XMFLOAT3 myScale;
+	DirectX::XMMATRIX myMatrix;
 	
 	Model* myModel;
 	Texture* myTexture;

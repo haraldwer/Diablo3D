@@ -43,3 +43,8 @@ Vec2F Input::GetMouseDelta()
 {
 	return { myInputHandler.GetMouseHorizontalDelta(), myInputHandler.GetMouseVerticalDelta() };
 }
+
+float Input::GetWheelDelta()
+{
+	return myInputHandler.GetMouseWheelDelta();
+}
