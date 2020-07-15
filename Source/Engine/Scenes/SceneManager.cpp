@@ -30,24 +30,6 @@ SceneID SceneManager::LoadScene(ResourceID sceneID)
 	return LoadScene(resource);
 }
 
-Vec3F LoadVec(const char* name, const rapidjson::GenericObject<false, rapidjson::Value>& aBase)
-{
-	Vec3F vec;
-	if(aBase.HasMember(name) && aBase[name].IsObject())
-	{
-		if (aBase[name].HasMember("x"))
-			if(aBase[name]["x"].IsFloat() || aBase[name]["x"].IsInt())
-				vec.x = aBase[name]["x"].GetFloat();
-		if (aBase[name].HasMember("y"))
-			if (aBase[name]["y"].IsFloat() || aBase[name]["x"].IsInt())
-				vec.y = aBase[name]["y"].GetFloat();
-		if (aBase[name].HasMember("z"))
-			if (aBase[name]["z"].IsFloat() || aBase[name]["x"].IsInt())
-				vec.z = aBase[name]["z"].GetFloat();
-	}
-	return vec;
-}
-
 SceneID SceneManager::LoadScene(EngineResource* aSceneResource)
 {
 	if (!aSceneResource)
@@ -90,25 +72,7 @@ SceneID SceneManager::LoadScene(EngineResource* aSceneResource)
 	
 	Scene* scene = new Scene(id, path);
 	myScenes[id] = scene;
-	int c = 0;
-	for(auto& it : doc["Entities"].GetArray())
-	{
-		if(!it.IsObject() || !it.HasMember("Prefab") || !it["Prefab"].IsInt())
-		{
-			Debug::Error << aSceneResource->myName << " : Entity array object did not contain prefab reference or was formatted incorrectly" << system << std::endl;
-			continue;
-		}
-		
-		const auto e = scene->CreateEntity(it["Prefab"].GetInt());
-		if (e)
-		{
-			e->GetTransform().SetPosition(LoadVec("Position", it.GetObject()));
-			e->GetTransform().SetRotation(LoadVec("Rotation", it.GetObject()));
-			e->GetTransform().SetScale(LoadVec("Scale", it.GetObject()));
-			c++;
-		}
-	}
-	Debug::Log << "Scene loaded, " << c << " instance" << (c > 1 ? "s" : "") << " created" << std::endl;
+	scene->Load(doc);
 	return id;
 }
 
@@ -116,7 +80,7 @@ bool SceneManager::UnloadScene(const std::string& aScene)
 {
 	for (auto& it : myScenes)
 		if (CommonUtilities::Horspool(aScene, it.second->GetPath()) != -1)
-			UnloadScene(it.second->GetID());
+			return UnloadScene(it.second->GetID());
 	return false;
 }
 
@@ -130,6 +94,7 @@ bool SceneManager::UnloadScene(SceneID aSceneID)
 	ServiceLocator::Instance().GetService<PhysicsManager>().DestroyScene(aSceneID);
 	delete myScenes[aSceneID];
 	myScenes[aSceneID] == nullptr;
+	myScenes.erase(aSceneID);
 	return true;
 }
 

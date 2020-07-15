@@ -4,6 +4,10 @@
 #include "Engine/Utility/ServiceLocator.h"
 #include "Engine/Entity/PrefabManager.h"
 #include "Engine/ECS/CSystem.h"
+#include "../Utility/JSONHelper.h"
+#include "Engine/EngineResources/ResourceManager.h"
+#include "RapidJSON/formatter.h"
+#include <fstream>
 
 Scene::Scene(SceneID anID, const std::string& aPath) : myID(anID), myPath(aPath), myLatestIndex(0)
 {
@@ -33,7 +37,7 @@ Entity* Scene::CreateEntity(PrefabID aPrefabID)
 	myObjectPool[myLatestIndex].myInUse = true;
 	myObjectPool[myLatestIndex].myObject.Construct(myLatestIndex, aPrefabID);
 	Entity* entity = &myObjectPool[myLatestIndex].myObject;
-	CSystemManager& systemManager = ServiceLocator::Instance().GetService<CSystemManager>();
+	auto& systemManager = ServiceLocator::Instance().GetService<CSystemManager>();
 	auto comp = prefab->GetComponents();
 	for(auto& it : comp)
 	{
@@ -88,4 +92,56 @@ std::vector<EntityID> Scene::GetEntities()
 		if (it.myInUse)
 			entities.push_back(it.myObject.GetID());
 	return entities;
+}
+
+void Scene::Load(rapidjson::Document& aDoc)
+{
+	int c = 0;
+	for (auto& it : aDoc["Entities"].GetArray())
+	{
+		if (!it.IsObject() || !it.HasMember("Prefab") || !it["Prefab"].IsInt())
+		{
+			Debug::Error << "Prefab reference is missing or formatted incorrectly in \"" << myPath << "\"" << std::endl;
+			continue;
+		}
+
+		const auto e = CreateEntity(it["Prefab"].GetInt());
+		if (e)
+		{
+			e->GetTransform().SetMatrix(Deserialize::Matrix(it.GetObject(), "Transform"));
+			c++;
+		}
+	}
+	Debug::Log << "Scene loaded, " << c << " instance" << (c > 1 ? "s" : "") << " created" << std::endl;
+}
+
+void Scene::Save()
+{
+	auto& resourceManager = ServiceLocator::Instance().GetService<ResourceManager>();
+	rapidjson::StringBuffer s;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+	writer.StartObject();
+	if(resourceManager.SaveResource(myID, writer))
+	{
+		writer.Key("Entities");
+		writer.StartArray();
+		for(auto& it : myObjectPool)
+			if(it.myInUse)
+				it.myObject.Save(writer);
+		writer.EndArray();
+		writer.EndObject();
+		const std::string formatted = Format(s.GetString());
+		std::ofstream out(myPath);
+		out.clear();
+		out << formatted;
+		out.close();
+		auto resource = resourceManager.GetResource(myID);
+		if (resource)
+			resource->myDoc = formatted;
+		Debug::Log << "Scene " << resource->myName << " saved" << std::endl;
+	}
+	else
+	{
+		writer.EndObject();
+	}
 }

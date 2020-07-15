@@ -201,6 +201,7 @@
     <ClInclude Include="Scenes\Scene.h" />
     <ClInclude Include="Scenes\SceneManager.h" />
     <ClInclude Include="Entity\Transform.h" />
+    <ClInclude Include="Utility\JSONHelper.h" />
     <ClInclude Include="Utility\ServiceLocator.h" />
   </ItemGroup>
   <ItemGroup>

@@ -833,7 +833,8 @@ namespace ImGuizmo
       gContext.mHeight = height;
       gContext.mXMax = gContext.mX + gContext.mWidth;
       gContext.mYMax = gContext.mY + gContext.mXMax;
-      gContext.mDisplayRatio = width / height;
+      if(width != 0 && height != 0)
+         gContext.mDisplayRatio = width / height;
    }
 
    IMGUI_API void SetOrthographic(bool isOrthographic)
@@ -860,10 +861,12 @@ namespace ImGuizmo
       ImGui::SetNextWindowPos(ImVec2(0, 0));
 #endif
 
+
       ImGui::PushStyleColor(ImGuiCol_WindowBg, 0);
       ImGui::PushStyleColor(ImGuiCol_Border, 0);
       ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 
+      
       ImGui::Begin("gizmo", NULL, flags);
       gContext.mDrawList = ImGui::GetWindowDrawList();
       ImGui::End();

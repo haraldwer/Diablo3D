@@ -1,6 +1,8 @@
 #include "Hierarchy.h"
 #include <string>
 
+bool Hierarchy::myIsFocused;
+
 Hierarchy::Hierarchy(Inspector& anInspector) : myInspector(anInspector)
 {
 }
@@ -29,11 +31,13 @@ void Hierarchy::Update(Engine* anEngine)
 	if (!anEngine)
 		return;
 
+	myIsFocused = ImGui::IsWindowFocused();
+	
 	SceneManager& sceneManager = anEngine->GetServiceLocator().GetService<SceneManager>();
 	ResourceManager& resourceManager = anEngine->GetServiceLocator().GetService<ResourceManager>();
 	auto loadedScenes = sceneManager.GetLoadedScenes();
-	
-	for(auto& sceneID : loadedScenes)
+
+	for (auto& sceneID : loadedScenes)
 	{
 		auto scene = sceneManager.GetScene(sceneID);
 		if (!scene)
@@ -42,7 +46,7 @@ void Hierarchy::Update(Engine* anEngine)
 			continue;
 		}
 		auto resource = resourceManager.GetResource(scene->GetID());
-		if(!resource)
+		if (!resource)
 		{
 			ImGui::Text(("Unable to get scene resource with id " + std::to_string(scene->GetID())).c_str());
 			continue;
@@ -52,35 +56,58 @@ void Hierarchy::Update(Engine* anEngine)
 		{
 			std::vector<std::string> nameVec;
 			std::vector<EntityID> idVec;
-			
+
 			auto entities = scene->GetEntities();
-			for(auto& entityID : entities)
+			for (auto& entityID : entities)
 			{
 				Entity* entity = scene->GetEntity(entityID);
 				std::string name = "";
 				EntityID id = -1;
-				if(!entity)
+				if (!entity)
 				{
 					name = "Unable to get entity with id " + std::to_string(entityID);
 					continue;
 				}
-				
+
 				auto prefabResource = resourceManager.GetResource(entity->GetPrefabID());
-				if(!prefabResource)
+				if (!prefabResource)
 				{
 					name = "Unable to get prefab resource with id " + std::to_string(entity->GetPrefabID());
 					continue;
 				}
 				name = prefabResource->myName;
 				id = entityID;
-				if (ImGui::TreeNodeEx((name + "##" + std::to_string(id)).c_str(), ImGuiTreeNodeFlags_Leaf))
+
+				if (ImGui::TreeNodeEx((name + "##" + std::to_string(id)).c_str(), myInspector.GetIsSelected(sceneID, entityID) ? ImGuiTreeNodeFlags_Bullet : ImGuiTreeNodeFlags_Leaf))
 					ImGui::TreePop();
-				if(ImGui::IsItemClicked())
+				if (ImGui::IsItemClicked())
 				{
-					Debug::Log << entityID << std::endl;
 					myInspector.SetEntity(sceneID, entityID);
 				}
 			}
 		}
 	}
+
+	if(myIsFocused)
+	{
+		Input& input = anEngine->GetServiceLocator().GetService<Input>();
+		if(input.Get(VK_CONTROL) && input.GetPressed('S'))
+		{
+			for (auto& sceneID : loadedScenes)
+			{
+				auto scene = sceneManager.GetScene(sceneID);
+				if (!scene)
+				{
+					ImGui::Text(("Unable to get scene with id " + std::to_string(sceneID)).c_str());
+					continue;
+				}
+				scene->Save();
+			}
+		}
+	}
+}
+
+bool Hierarchy::IsFocused()
+{
+	return myIsFocused;
 }

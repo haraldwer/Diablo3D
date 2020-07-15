@@ -13,14 +13,14 @@ void Gizmo::Init(D3DSystem* aSystem)
 	mySystem = aSystem;
 }
 
-void Gizmo::Update(Input& input, const ImVec2& aViewPos, const ImVec2& aViewSize)
+void Gizmo::Update(Input& input, const ImVec2& pos, const ImVec2& size)
 {
-	myClipRecStart = aViewPos;
-	myClipRecEnd = aViewPos;
-	myClipRecEnd.x += aViewSize.x;
-	myClipRecEnd.y += aViewSize.y;
+	myPos = pos;
+	mySize = size;
 
-	if (input.GetButton(CommonUtilities::Button::MOUSE_RIGHT))
+	const bool enabled = !input.GetButton(CommonUtilities::Button::MOUSE_RIGHT) && ImGui::IsWindowHovered();
+	ImGuizmo::Enable(enabled);
+	if (!enabled)
 		return;
 	
 	if (input.GetPressed('W'))
@@ -68,8 +68,8 @@ bool Gizmo::Manipulate(Transform& aTransform)
 			changed = true;
 		ImGuizmo::RecomposeMatrixFromComponents(posArr, rotArr, scaleArr, objectMatrix);
 	}
-	
-	//ImGui::PushClipRect(myClipRecStart, myClipRecEnd, false);
+
+	//ImGui::PushClipRect(myPos, { myPos.x + mySize.x, myPos.y + mySize.y }, false);
 	ImGuizmo::Manipulate(view, projection, myCurrentOperation, myCurrentMode, objectMatrix, NULL, useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, snap ? boundsSnap : NULL);
 	//ImGui::PopClipRect();
 	aTransform.SetMatrix(objectMatrix);

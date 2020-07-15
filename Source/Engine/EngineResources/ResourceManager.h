@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include "EngineResource.h"
 #include "../Utility/ServiceLocator.h"
+#include "../RapidJSON/writer.h"
 
 class ResourceManager : public Service<ResourceManager>
 {
@@ -59,8 +60,8 @@ public:
 		std::vector<Folder*> folders;
 	};
 	
-	void LoadResources(const std::string& aPath);
-	EngineResource* CreateResource(const std::string& aResourceName, ResourceType aType);
+	void LoadResources();
+	ResourceID CreateResourceID(const std::string& aResourceName);
 	// Get resource with ID
 	EngineResource* GetResource(ResourceID anID);
 	// Get resources of type
@@ -69,10 +70,16 @@ public:
 
 	void Editor() override;
 	Folder* GetFolder() const;
-	
+	bool SaveResource(ResourceID anID, rapidjson::Writer<rapidjson::StringBuffer>& aBase);
+	void DeleteResource(ResourceID aResourceID);
+	void UnloadResource(ResourceID aResourceID);
+	void ImportResource(const std::string& aPath);
+	void DeleteUnloadedResource(const std::string& aPath);
+
 private:
 	void LoadResourcesRec(const std::string& aPath, Folder* aFolder);
 	void LoadResource(const std::string& aPath, Folder* aFolder);
+	bool SaveResource(EngineResource* aResource, rapidjson::Writer<rapidjson::StringBuffer>& aBase) const;
 
 	// All resources stored in a flat structure for easy indexing
 	std::unordered_map<ResourceID, EngineResource*> myResources;
@@ -80,4 +87,6 @@ private:
 
 	// Preserved hierarchy
 	Folder* myFolder;
+
+	static inline const char* myPath = "content";
 };

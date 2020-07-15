@@ -142,9 +142,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
     	
-        ImGuizmo::SetOrthographic(false);
-        ImGuizmo::BeginFrame();
-        
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
         editor->Update();
     	
@@ -165,6 +162,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
         g_pSwapChain->Present(0, 0); // Present without vsync
     }
 
+    editor->Shutdown();
+	
     // Cleanup
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
@@ -271,7 +270,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
         break;
     default:
         if (editor)
-            editor->MessageHandler(hWnd, msg, wParam, lParam);
+            return editor->MessageHandler(hWnd, msg, wParam, lParam);
         break;
     }
     return ::DefWindowProc(hWnd, msg, wParam, lParam);

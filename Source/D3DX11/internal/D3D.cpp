@@ -621,20 +621,26 @@ void D3D::SetResolution(int aWidth, int aHeight, bool aFullscreen, HWND aHwnd, f
 {
 	if(m_handleSwap)
 	{
-		ID3D11RenderTargetView* nullViews[] = { m_renderTargetView };
-		m_deviceContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
-		m_renderTargetView->Release();
-		m_depthStencilView->Release();
-		m_renderTargetView = nullptr;
-		m_depthStencilView = nullptr;
-		m_deviceContext->Flush();
+		if(m_deviceContext && m_renderTargetView && m_depthStencilView)
+		{
+			ID3D11RenderTargetView* nullViews[] = { m_renderTargetView };
+			m_deviceContext->OMSetRenderTargets(ARRAYSIZE(nullViews), nullViews, nullptr);
+			m_renderTargetView->Release();
+			m_renderTargetView = nullptr;
+			m_depthStencilView->Release();
+			m_depthStencilView = nullptr;
+			m_deviceContext->Flush();
+		}
 	}
 
-	// 2. Resize the existing swapchain
-	HRESULT hr = m_swapChain->ResizeBuffers(2, aWidth, aHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
-	if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
+	if(m_swapChain)
 	{
-		// This means that all resources has to be re-created!
+		// 2. Resize the existing swapchain
+		HRESULT hr = m_swapChain->ResizeBuffers(2, aWidth, aHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+		if (hr == DXGI_ERROR_DEVICE_REMOVED || hr == DXGI_ERROR_DEVICE_RESET)
+		{
+			// This means that all resources has to be re-created!
+		}
 	}
 	
 	// 3. Recreate resources

@@ -7,7 +7,7 @@ Engine::~Engine()
 void Engine::Init()
 {
 	myInput.Init();
-	myResourceManager.LoadResources("content");
+	myResourceManager.LoadResources();
 	myPhysicsManager.Init();
 	myComponentManager.Init();
 	mySceneManager.Init();

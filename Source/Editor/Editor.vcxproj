@@ -184,6 +184,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CameraController.cpp" />
     <ClCompile Include="Hierarchy.cpp" />
     <ClCompile Include="Inspector\CommandQueue.cpp" />
     <ClCompile Include="Editor.cpp" />
@@ -191,11 +192,16 @@
     <ClCompile Include="Inspector\Inspector.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Preferences.cpp" />
     <ClCompile Include="Resources\ResourceBrowser.cpp" />
     <ClCompile Include="Resources\ResourceViewer.cpp" />
+    <ClCompile Include="Theme\Theme.cpp" />
     <ClCompile Include="Viewport.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CameraController.h" />
+    <ClInclude Include="Preferences.h" />
+    <ClInclude Include="Theme\EditorColorPicker.h" />
     <ClInclude Include="Hierarchy.h" />
     <ClInclude Include="Inspector\CommandQueue.h" />
     <ClInclude Include="Editor.h" />
@@ -204,6 +210,7 @@
     <ClInclude Include="Log.h" />
     <ClInclude Include="Resources\ResourceBrowser.h" />
     <ClInclude Include="Resources\ResourceViewer.h" />
+    <ClInclude Include="Theme\Theme.h" />
     <ClInclude Include="Viewport.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

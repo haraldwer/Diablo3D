@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "../Entity/Entity.h"
+#include "../../RapidJSON/document.h"
 
 typedef ResourceID SceneID;
 
@@ -23,7 +24,10 @@ public:
 	std::string GetPath() const;
 	SceneID GetID() const;
 	std::vector<EntityID> GetEntities();
-
+	
+	void Load(rapidjson::Document& aDoc);
+	void Save();
+	
 private:
 	const SceneID myID;
 	const std::string myPath;

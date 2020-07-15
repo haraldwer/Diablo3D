@@ -75,6 +75,9 @@
     <ClInclude Include="Utility\Input.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Utility\JSONHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Engine.rc">

@@ -17,6 +17,8 @@ namespace CommonUtilities
 
 		template<typename value>
 		const value& GetValue(const key& aKey) const;
+		template<typename value>
+		const std::type_info* GetType(const key& aKey) const;
 
 		template<typename value>
 		value& ChangeValue(const key& aKey);
@@ -96,6 +98,15 @@ namespace CommonUtilities
 		auto it = myDataPointers.find(aKey);
 		assert(it != myDataPointers.end() && "Key not found in opaque dictionary!");
 		return *(reinterpret_cast<value*>((*it).second));
+	}
+
+	template <typename key, short MAXSIZE>
+	template <typename value>
+	const std::type_info* OpaqueDictionary<key, MAXSIZE>::GetType(const key& aKey) const
+	{
+		auto type = myDataTypes.find(aKey);
+		assert(type != myDataTypes.end() && "Key not found in opaque dictionary!");
+		return type->second;
 	}
 
 	template<typename key, short MAXSIZE>

@@ -3,29 +3,27 @@
 #include "../ImGui/imgui.h"
 #include "ResourceViewer.h"
 
-void ResourceBrowser::Init()
+
+ResourceBrowser::ResourceBrowser(): myManager(nullptr)
 {
-	for(int i = 0; i < ResourceType::_size(); i++)
-	{
-		ResourceType type = ResourceType::_from_index(i);
-		ResourceViewer* viewer = CreateResourceViewer(type);
-		if (viewer)
-			myResourceViewers[type._to_index()] = viewer;
-	}
 }
 
 void ResourceBrowser::Update(Engine* anEngine)
 {
 	if (!anEngine)
+	{
+		myManager = nullptr;
 		return;
+	}
 
-	ResourceManager& resourceManager = anEngine->GetServiceLocator().GetService<ResourceManager>();
-	ResourceManager::Folder* base = resourceManager.GetFolder();
+	myManager = &anEngine->GetServiceLocator().GetService<ResourceManager>();
+	ResourceManager::Folder* base = myManager->GetFolder();
 	ImGui::SetNextTreeNodeOpen(true);
 	Folder(base);
-	
-	for (auto& it : myResourceViewers)
-		it.second->WindowUpdate(anEngine);
+
+	for (int i = myResourceViewers.size() - 1; i >= 0; i--)
+		if (!myResourceViewers[i]->WindowUpdate(anEngine))
+			myResourceViewers.erase(myResourceViewers.begin() + i);
 }
 
 void ResourceBrowser::Folder(ResourceManager::Folder* aFolder)
@@ -40,17 +38,53 @@ void ResourceBrowser::Folder(ResourceManager::Folder* aFolder)
 
 		for(auto& it : aFolder->resources)
 		{
-			if (ImGui::TreeNodeEx(it->myName.c_str(), ImGuiTreeNodeFlags_Leaf))
+			if(!it)
+			{
+				if (ImGui::TreeNodeEx("Unable to get resource ptr", ImGuiTreeNodeFlags_Leaf))
+					ImGui::TreePop();
+				continue;
+			}
+
+			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf;
+			const bool selected = GetIsResourceSelected(it->myID);
+			if (selected)
+				flags = ImGuiTreeNodeFlags_Bullet;
+			const bool open = ImGui::TreeNodeEx(it->myName.c_str(), flags);
+			if (ImGui::BeginPopupContextItem())
+			{
+				if(LoadedContextMenu(it))
+				{
+					ImGui::EndPopup();
+					if (open)
+						ImGui::TreePop();
+					ImGui::TreePop();
+					return;
+				}
+				ImGui::EndPopup();
+			}
+			if (open)
 				ImGui::TreePop();
 			if (ImGui::IsItemClicked())
-				SelectResource(it);
+				selected ? DeselectResource(it) : SelectResource(it); // If already selected, deselect. Else select.
 		}
 
 		for(auto& it : aFolder->unloadedResources)
 		{
-			if (ImGui::TreeNodeEx((it->name + " (unloaded)").c_str(), ImGuiTreeNodeFlags_Leaf))
+			const bool open = ImGui::TreeNodeEx((it->name + " (unloaded)").c_str(), ImGuiTreeNodeFlags_Leaf);
+			if (ImGui::BeginPopupContextItem())
+			{
+				if(UnloadedContextMenu(it))
+				{
+					ImGui::EndPopup();
+					if (open)
+						ImGui::TreePop();
+					ImGui::TreePop();
+					return;
+				}
+				ImGui::EndPopup();
+			}
+			if (open)
 				ImGui::TreePop();
-			//if (ImGui::IsItemClicked())
 		}
 		ImGui::TreePop();
 	}
@@ -63,17 +97,41 @@ void ResourceBrowser::SelectResource(EngineResource* aResource)
 		Debug::Error << "Resource ptr was null" << std::endl;
 		return;
 	}
-	Debug::Log << "Resource with name " << aResource->myName << " selected" << std::endl;
-	auto ptr = myResourceViewers.find(aResource->myType._to_index());
-	if(ptr != myResourceViewers.end())
-		if(ptr->second)
-			ptr->second->Select(aResource->myID);
+	ResourceViewer* resourceViewer = CreateResourceViewer(aResource);
+	if(!resourceViewer)
+	{
+		Debug::Error << "Unable to create ResourceViewer" << std::endl;
+		return;
+	}
+	myResourceViewers.push_back(resourceViewer);
 }
 
-ResourceViewer* ResourceBrowser::CreateResourceViewer(const ResourceType& aType)
+void ResourceBrowser::DeselectResource(EngineResource* aResource)
 {
-	ResourceViewer* viewer;
-	switch(aType)
+	for(int i = 0; i < myResourceViewers.size(); i++)
+	{
+		if (myResourceViewers[i]->GetResourceID() == aResource->myID)
+		{
+			myResourceViewers.erase(myResourceViewers.begin() + i);
+			return;
+		}
+	}
+}
+
+bool ResourceBrowser::GetIsResourceSelected(ResourceID anID)
+{
+	for (auto& it : myResourceViewers)
+		if (it->GetResourceID() == anID)
+			return true;
+	return false;
+}
+
+ResourceViewer* ResourceBrowser::CreateResourceViewer(EngineResource* aResource)
+{
+	if (!aResource)
+		return nullptr;
+	ResourceViewer* viewer = nullptr;
+	switch(aResource->myType)
 	{
 	case ResourceType::MODEL:
 		break;
@@ -86,6 +144,45 @@ ResourceViewer* ResourceBrowser::CreateResourceViewer(const ResourceType& aType)
 	default:
 		return nullptr;
 	}
-	viewer = new ResourceViewer(aType);
+	viewer = new ResourceViewer(aResource->myType, aResource->myID);
 	return viewer;
 }
+
+bool ResourceBrowser::LoadedContextMenu(EngineResource* aResource)
+{
+	if (!aResource || !myManager)
+		return false;
+	
+	if(ImGui::MenuItem("Rename"))
+	{
+	}
+	if(ImGui::MenuItem("Unload"))
+	{
+		myManager->UnloadResource(aResource->myID);
+		return true;
+	}
+	if(ImGui::MenuItem("Delete"))
+	{
+		myManager->DeleteResource(aResource->myID);
+		return true;
+	}
+	return false;
+}
+
+bool ResourceBrowser::UnloadedContextMenu(ResourceManager::UnloadedResource* aResource)
+{
+	if (!aResource || !myManager)
+		return false;
+	if(ImGui::MenuItem("Import"))
+	{
+		myManager->ImportResource(aResource->path);
+		return true;
+	}
+	if(ImGui::MenuItem("Delete"))
+	{
+		myManager->DeleteUnloadedResource(aResource->path);
+		return true;
+	}
+	return false;
+}
+

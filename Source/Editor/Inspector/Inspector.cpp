@@ -1,4 +1,15 @@
 #include "Inspector.h"
+#include "../Viewport.h"
+#include "../Hierarchy.h"
+
+Inspector::Inspector(): mySelectedID("InspectorSelectedID", -1), mySelectedScene("InspectorSelectedSceneID", -1)
+{
+}
+
+bool Inspector::GetIsSelected(SceneID aSceneID, EntityID aEntityID)
+{
+	return (aSceneID == mySelectedScene.Get() && aEntityID == mySelectedID.Get());
+}
 
 Entity* Inspector::GetEntity(SceneID sceneID, EntityID entityID)
 {
@@ -22,8 +33,8 @@ Entity* Inspector::GetEntity(SceneID sceneID, EntityID entityID)
 void Inspector::EditTranform(Transform& aTransform)
 {
 	Command* c = new Command();
-	c->sceneID = mySelectedScene;
-	c->entityID = mySelectedID;
+	c->sceneID = mySelectedScene.Get();
+	c->entityID = mySelectedID.Get();
 	c->data.SetValue<Vec3F>(0, aTransform.GetPosition());
 	c->data.SetValue<Vec3F>(1, aTransform.GetRotation());
 	c->data.SetValue<Vec3F>(2, aTransform.GetScale());
@@ -55,20 +66,12 @@ void Inspector::Update(Gizmo& aGizmo, Engine* anEngine)
 	if (!myEngine)
 		return;
 	
-	Input& input = myEngine->GetServiceLocator().GetService<Input>();
-	if (input.Get(VK_CONTROL))
-	{
-		if(input.GetPressed('Z'))
-			myCommandQueue.Revert();
-		if (input.GetPressed('Y'))
-			myCommandQueue.Redo();
-	}
-	
-	Entity* entity = GetEntity(mySelectedScene, mySelectedID);
+	Entity* entity = GetEntity(mySelectedScene.Get(), mySelectedID.Get());
 	if(!entity)
 	{
-		mySelectedScene = -1;
-		mySelectedID = -1;
+		mySelectedScene.Set(-1);
+		mySelectedID.Set(-1);
+		ImGui::Text("No entity selected");
 		return;
 	}
 	
@@ -83,10 +86,69 @@ void Inspector::Update(Gizmo& aGizmo, Engine* anEngine)
 	else
 		if(myIsManipulating)
 			myIsManipulating = false;
+
+	if (ImGui::IsWindowFocused() || Viewport::IsFocused() || Hierarchy::IsFocused())
+	{
+		Input& input = myEngine->GetServiceLocator().GetService<Input>();
+		if (!Hierarchy::IsFocused() && input.Get(VK_CONTROL))
+		{
+			if (input.GetPressed('Z'))
+				myCommandQueue.Revert();
+			if (input.GetPressed('Y'))
+				myCommandQueue.Redo();
+			if (input.GetPressed('S'))
+				Save();
+			if (input.GetPressed('D'))
+				Duplicate();
+		}
+		//if (input.GetPressed(VK_DELETE))
+		//	entity->Destroy();
+	}
 }
 
 void Inspector::SetEntity(const SceneID aScene, const EntityID aEntity)
 {
-	mySelectedID = aEntity;
-	mySelectedScene = aScene;
+	mySelectedID.Set(aEntity);
+	mySelectedScene.Set(aScene);
+}
+
+void Inspector::Save()
+{
+	ServiceLocator& serviceLocator = myEngine->GetServiceLocator();
+	SceneManager& sceneManager = serviceLocator.GetService<SceneManager>();
+	Scene* scene = sceneManager.GetScene(mySelectedScene.Get());
+	if (!scene)
+	{
+		Debug::Error << "Unable to save scene, scene ptr was null" << std::endl;
+		return;
+	}
+	scene->Save();
+}
+
+void Inspector::Duplicate()
+{
+	if(mySelectedID.Get() == -1 || mySelectedScene.Get() == -1)
+	{
+		Debug::Error << "Unable to duplicate entity, no entity selected" << std::endl;
+		return;
+	}
+	ServiceLocator& serviceLocator = myEngine->GetServiceLocator();
+	SceneManager& sceneManager = serviceLocator.GetService<SceneManager>();
+	Scene* scene = sceneManager.GetScene(mySelectedScene.Get());
+	if(!scene)
+	{
+		Debug::Error << "Unable to find scene with ID " << mySelectedScene.Get() << std::endl;
+		return;
+	}
+	Entity* entity = GetEntity(mySelectedScene.Get(), mySelectedID.Get());
+	if (!scene)
+	{
+		Debug::Error << "Unable to find entity with ID " << mySelectedID.Get() << std::endl;
+		return;
+	}
+	auto duplicate = scene->CreateEntity(entity->GetPrefabID());
+	duplicate->GetTransform().SetMatrix(entity->GetTransform().GetMatrix());
+	// Also transfer component overrides!
+
+	Debug::Log << "Entity duplicated" << std::endl;
 }

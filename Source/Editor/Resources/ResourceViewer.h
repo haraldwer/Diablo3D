@@ -5,14 +5,16 @@ class Engine;
 class ResourceViewer
 {
 public:
-	ResourceViewer(const ResourceType& aType);
+	ResourceViewer(const ResourceType& aType, const ResourceID aResourceID);
 	virtual ~ResourceViewer() = default;
-	void WindowUpdate(Engine* anEngine);
-	virtual void Update(EngineResource* aResource, Engine* anEngine) {};
-	virtual void Select(ResourceID anID);
+	bool WindowUpdate(Engine* anEngine);
+	virtual void Update(EngineResource* aResource, Engine* anEngine) {}
+	ResourceID GetResourceID() const;;
+	bool IsOpen() const;
+	
 private:
 	bool myIsOpen;
-	ResourceID myResourceID;
+	const ResourceID myResourceID;
 	const ResourceType myResourceType;
 };
 

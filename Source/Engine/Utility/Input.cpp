@@ -48,3 +48,13 @@ float Input::GetWheelDelta()
 {
 	return myInputHandler.GetMouseWheelDelta();
 }
+
+CommonUtilities::Vector2<int> Input::GetMousePosition()
+{
+	return { myInputHandler.GetMouseX(), myInputHandler.GetMouseY() };
+}
+
+CommonUtilities::Vector2<int> Input::GetMouseAbsolutePosition()
+{
+	return { myInputHandler.GetMouseAbsoluteX(), myInputHandler.GetMouseAbsoluteY() };
+}

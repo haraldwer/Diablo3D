@@ -5,6 +5,8 @@
 
 D3DSystem* D3DSystem::instance = nullptr;
 
+D3DSystem* localInstance = nullptr;
+
 D3DSystem::D3DSystem(): m_applicationName(nullptr), m_hinstance(nullptr), m_hwnd(nullptr), m_frameCounter(),
                         m_cpuUsage(), m_timer()
 {
@@ -21,6 +23,7 @@ bool D3DSystem::Initialize(CreateParams& params)
 	// Get an external pointer to this object.	
 	ApplicationHandle = this;
 	instance = this;
+	localInstance = this;
 
 	// Get the instance of this application.
 	m_hinstance = GetModuleHandle(NULL);
@@ -264,6 +267,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		}
 		else if (!s_in_sizemove)
 			// HERE is where you'd trigger a resize based on MINIMIZE/MAXIMIZE/RESTORE
+			//if (localInstance)
+			//	localInstance->SetResolution((UINT)LOWORD(lParam), (UINT)HIWORD(lParam));
 			break;
 
 	case WM_ENTERSIZEMOVE:

@@ -19,6 +19,8 @@ public:
 	bool GetButton(CommonUtilities::Button aButton);
 	Vec2F GetMouseDelta();
 	float GetWheelDelta();
+	CommonUtilities::Vector2<int> GetMousePosition();
+	CommonUtilities::Vector2<int> GetMouseAbsolutePosition();
 
 private:
 	CommonUtilities::InputHandler myInputHandler;

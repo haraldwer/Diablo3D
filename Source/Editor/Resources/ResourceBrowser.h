@@ -6,12 +6,16 @@ class ResourceViewer;
 class ResourceBrowser
 {
 public:
-	void Init();
+	ResourceBrowser();
 	void Update(Engine* anEngine);
 	void Folder(ResourceManager::Folder* aFolder);
 	void SelectResource(EngineResource* aResource);
-	ResourceViewer* CreateResourceViewer(const ResourceType& aType);
+	void DeselectResource(EngineResource* aResource);
+	bool GetIsResourceSelected(ResourceID anID);
+	ResourceViewer* CreateResourceViewer(EngineResource* aResource);
 private:
-	std::unordered_map<int, ResourceViewer*> myResourceViewers;
+	bool LoadedContextMenu(EngineResource* aResource);
+	bool UnloadedContextMenu(ResourceManager::UnloadedResource* aResource);
+	std::vector<ResourceViewer*> myResourceViewers;
+	ResourceManager* myManager;
 };
-

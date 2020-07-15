@@ -2,14 +2,16 @@
 #include "Log.h"
 #include "RapidJSON/parser.h"
 #include "RapidJSON/document.h"
+#include "RapidJSON/formatter.h"
 #include <filesystem>
 
 #include "HashMap.hpp"
 #include "ImGui/imgui.h"
+#include "Engine/Utility/JSONHelper.h"
 
 namespace fs = std::filesystem;
 
-void ResourceManager::LoadResources(const std::string& aPath)
+void ResourceManager::LoadResources()
 {
 	Debug::Log << "Loading resources" << std::endl;
 	for (auto& it : myResources)
@@ -23,9 +25,9 @@ void ResourceManager::LoadResources(const std::string& aPath)
 	}
 	if(!myFolder)
 	{
-		myFolder = new Folder(aPath);
+		myFolder = new Folder(myPath);
 	}
-	LoadResourcesRec(aPath, myFolder);
+	LoadResourcesRec(myPath, myFolder);
 }
 
 void ResourceManager::LoadResourcesRec(const std::string& aPath, Folder* aFolder)
@@ -133,16 +135,12 @@ void ResourceManager::LoadResource(const std::string& aPath, Folder* aFolder)
 	}
 }
 
-EngineResource* ResourceManager::CreateResource(const std::string& aResourceName, ResourceType aType)
+ResourceID ResourceManager::CreateResourceID(const std::string& aResourceName)
 {
-	// Create hash
 	ResourceID hash = CommonUtilities::Hash(aResourceName);
-	while (myResources.find(hash) == myResources.end())
+	while (myResources.find(hash) != myResources.end())
 		hash++;
-	EngineResource* resource = new EngineResource();
-	myResources[hash] = resource;
-	myResourceTypeMap[aType._to_integral()].push_back(resource);
-	return resource;
+	return hash;
 }
 
 EngineResource* ResourceManager::GetResource(ResourceID anID)
@@ -182,4 +180,81 @@ void ResourceManager::Editor()
 ResourceManager::Folder* ResourceManager::GetFolder() const
 {
 	return myFolder;
+}
+
+bool ResourceManager::SaveResource(ResourceID anID, rapidjson::Writer<rapidjson::StringBuffer>& aBase)
+{
+	EngineResource* resource = GetResource(anID);
+	if(!resource)
+	{
+		Debug::Error << "Unable to save resource, could not find resource with ID " << anID << std::endl;
+		return false;
+	}
+	return SaveResource(resource, aBase);
+}
+
+bool ResourceManager::SaveResource(EngineResource* aResource, rapidjson::Writer<rapidjson::StringBuffer>& aBase) const
+{
+	Serialize::Serialize("Name", aResource->myName, aBase);
+	Serialize::Serialize("Type", std::string(aResource->myType._to_string()), aBase);
+	Serialize::Serialize("ID", aResource->myID, aBase);
+	Serialize::Serialize("Ext", aResource->myExt, aBase);
+	return true;
+}
+
+void ResourceManager::DeleteResource(ResourceID aResourceID)
+{
+	auto resource = GetResource(aResourceID);
+	if (!resource)
+		return;
+	auto json = ClipExt(resource->myPath);
+	std::remove((json + ".json").c_str());
+	std::remove((json + resource->myExt).c_str());
+	LoadResources();
+}
+
+void ResourceManager::UnloadResource(ResourceID aResourceID)
+{
+	auto resource = GetResource(aResourceID);
+	if (!resource)
+		return;
+	auto json = ClipExt(resource->myPath);
+	std::remove((json + ".json").c_str());
+	LoadResources();
+}
+
+void ResourceManager::ImportResource(const std::string& aPath)
+{
+	auto ext = GetExt(aPath);
+	
+	rapidjson::StringBuffer s;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+	writer.StartObject();
+
+	ResourceType type;
+	if (ext == "tga" || ext == "dds")
+		type = ResourceType::TEXTURE;
+	if (ext == "obj" || ext == "fbx")
+		type = ResourceType::MODEL;
+	
+	auto resource = new EngineResource();
+	resource->myName = GetNameFromPath(aPath);
+	resource->myID =  CreateResourceID(resource->myName);
+	resource->myExt = GetExt(aPath);
+	resource->myPath = aPath;
+	resource->myType = type;
+	
+	SaveResource(resource, writer);
+	writer.EndObject();
+	std::ofstream out(ClipExt(aPath) + ".json");
+	out.clear();
+	out << Format(s.GetString());
+	out.close();
+	LoadResources();
+}
+
+void ResourceManager::DeleteUnloadedResource(const std::string& aPath)
+{
+	std::remove(aPath.c_str());
+	LoadResources();
 }

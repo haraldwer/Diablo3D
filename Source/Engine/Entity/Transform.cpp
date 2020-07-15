@@ -36,14 +36,18 @@ void Transform::SetPosition(const Vec3F& aPosition)
 
 void Transform::SetRotation(const Vec3F& aRotation)
 {
-	const Vec3F rot = GetRotation();
-	Rotate(rot * -1.0f);
+	// This one doesn't work yet
+	auto pos = GetPosition();
+	auto scale = GetScale();
+	myMatrix = CommonUtilities::Matrix4x4<float>();
 	Rotate(aRotation);
+	SetPosition(pos);
+	SetScale(scale);
 }
 
 void Transform::Rotate(const Vec3F& aRotation)
 {
-	myMatrix *= 
+	myMatrix = myMatrix * 
 		Mat4f::CreateRotationAroundX(aRotation.x) *
 		Mat4f::CreateRotationAroundY(aRotation.y) * 
 		Mat4f::CreateRotationAroundZ(aRotation.z);
