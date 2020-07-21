@@ -18,10 +18,12 @@ public:
 	void Init();
 	void Update();
 	CSystemBase* GetSystem(const std::string& aSystemName);
+	CSystemBase* GetSystem(const std::type_index& aSystemTypeIndex);
 	template <class T>
 	T* GetSystem();
 	std::string GetName() override { return "CS Manager"; }
 	void Editor() override;
+	void RemoveEntity(const EntityID anEntityID, const std::vector<std::type_index>& someSystemTypes);
 private:
 	static std::vector<CSystemBase*> mySystems;
 	static CSystemManager* instance;

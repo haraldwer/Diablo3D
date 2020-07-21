@@ -35,7 +35,7 @@ Entity* Scene::CreateEntity(PrefabID aPrefabID)
 		}
 	}
 	myObjectPool[myLatestIndex].myInUse = true;
-	myObjectPool[myLatestIndex].myObject.Construct(myLatestIndex, aPrefabID);
+	myObjectPool[myLatestIndex].myObject.Construct(myLatestIndex, aPrefabID, myID);
 	Entity* entity = &myObjectPool[myLatestIndex].myObject;
 	auto& systemManager = ServiceLocator::Instance().GetService<CSystemManager>();
 	auto comp = prefab->GetComponents();
@@ -48,6 +48,7 @@ Entity* Scene::CreateEntity(PrefabID aPrefabID)
 			continue;
 		}
 		system->AddEntity(entity);
+		entity->AddSystem(system->GetTypeIndex());
 	}
 	return entity;
 }
@@ -62,17 +63,18 @@ Entity* Scene::GetEntity(const EntityID anID)
 	return &myObjectPool[anID].myObject;
 }
 
-void Scene::DestroyEntity(const EntityID anID)
+bool Scene::DestroyEntity(const EntityID anID)
 {
 	if (anID < 0 || anID >= poolSize || !myObjectPool[anID].myInUse)
 	{
-		Debug::Warning << "Invalid ID" << std::endl;
-		return;
+		Debug::Warning << "Invalid ID when trying to destroy entity: " << anID << std::endl;
+		return false;
 	}
 	myObjectPool[anID].myObject.Destruct();
 	myObjectPool[anID].myInUse = false;
 	if (anID < myLatestIndex)
 		myLatestIndex = anID;
+	return true;
 }
 
 std::string Scene::GetPath() const

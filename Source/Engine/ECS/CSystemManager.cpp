@@ -47,7 +47,24 @@ void CSystemManager::Update()
 
 CSystemBase* CSystemManager::GetSystem(const std::string& aSystemName)
 {
-	return mySystemMap[aSystemName];
+	const auto find = mySystemMap.find(aSystemName);
+	if (find == mySystemMap.end())
+	{
+		Debug::Error << "Unable to find system with name " << aSystemName << std::endl;
+		return nullptr;
+	}
+	return find->second;
+}
+
+CSystemBase* CSystemManager::GetSystem(const std::type_index& aSystemTypeIndex)
+{
+	const auto find = mySystemHashMap.find(aSystemTypeIndex);
+	if (find == mySystemHashMap.end())
+	{
+		Debug::Error << "Unable to find system with hash " << aSystemTypeIndex.hash_code() << std::endl;
+		return nullptr;
+	}
+	return find->second;
 }
 
 void CSystemManager::Editor()
@@ -60,4 +77,14 @@ void CSystemManager::Editor()
 		ImGui::Text((it.first + ": " + std::to_string(it.second->GetEntityCount())).c_str());
 	ImGui::PopStyleVar();
 	ImGui::EndChild();
+}
+
+void CSystemManager::RemoveEntity(const EntityID anEntityID, const std::vector<std::type_index>& someSystemTypes)
+{
+	for(auto& it : someSystemTypes)
+	{
+		auto sys = GetSystem(it);
+		if (sys)
+			sys->RemoveEntity(anEntityID);
+	}
 }

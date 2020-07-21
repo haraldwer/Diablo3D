@@ -1,8 +1,7 @@
 #pragma once
 #include <vector>
 #include "../EngineResources/EngineResource.h"
-
-typedef ResourceID PrefabID;
+#include "../ResouceIDs.h"
 
 class Prefab
 {

@@ -101,8 +101,11 @@ void Inspector::Update(Gizmo& aGizmo, Engine* anEngine)
 			if (input.GetPressed('D'))
 				Duplicate();
 		}
-		//if (input.GetPressed(VK_DELETE))
-		//	entity->Destroy();
+		if (input.GetPressed(VK_DELETE))
+		{
+			entity->Destroy();
+			SetEntity(-1, -1);
+		}
 	}
 }
 

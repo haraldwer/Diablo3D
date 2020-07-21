@@ -2,8 +2,8 @@
 #include "Prefab.h"
 #include "Transform.h"
 #include "../RapidJSON/writer.h"
-
-typedef int EntityID;
+#include "../ResouceIDs.h"
+#include <typeindex>
 
 class Entity
 {
@@ -13,12 +13,16 @@ public:
 	PrefabID GetPrefabID() const;
 	Transform& GetTransform();
 	void Save(rapidjson::Writer<rapidjson::StringBuffer>& aBase) const;
-	
+	bool Destroy();
+
 private:
-	void Construct(const EntityID anID, const PrefabID aPrefabID);
+	void AddSystem(const std::type_index& aTypeIndex);
+	void Construct(const EntityID anID, const PrefabID aPrefabID, const SceneID aSceneID);
 	void Destruct();
-	EntityID myID; // Duplicate entity ids are illegal
-	PrefabID myPrefabID; // Duplicate prefab ids are illegal
+	EntityID myID;
+	PrefabID myPrefabID;
+	SceneID mySceneID;
 	Transform myTransform;
+	std::vector<std::type_index> mySystemRefs;
 };
 

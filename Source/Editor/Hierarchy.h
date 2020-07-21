@@ -9,6 +9,7 @@ public:
 	void Update(Engine* anEngine);
 	static bool IsFocused();
 private:
+
 	static bool myIsFocused;
 	Inspector& myInspector;
 };

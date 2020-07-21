@@ -2,8 +2,7 @@
 #include <string>
 #include "../Entity/Entity.h"
 #include "../../RapidJSON/document.h"
-
-typedef ResourceID SceneID;
+#include "../ResouceIDs.h"
 
 struct EntitySlot
 {
@@ -20,7 +19,7 @@ public:
 	Scene(SceneID anID, const std::string& aPath);
 	Entity* CreateEntity(PrefabID aPrefabID);
 	Entity* GetEntity(EntityID anID);
-	void DestroyEntity(EntityID anID);
+	bool DestroyEntity(EntityID anID);
 	std::string GetPath() const;
 	SceneID GetID() const;
 	std::vector<EntityID> GetEntities();

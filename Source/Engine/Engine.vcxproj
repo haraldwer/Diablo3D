@@ -192,6 +192,7 @@
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Entity\Prefab.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="ResouceIDs.h" />
     <ClInclude Include="Utility\Input.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="EngineResources\ResourceManager.h" />

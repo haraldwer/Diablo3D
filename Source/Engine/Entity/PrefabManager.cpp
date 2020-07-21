@@ -33,7 +33,10 @@ void PrefabManager::Editor()
 Prefab* PrefabManager::GetPrefab(PrefabID aPrefabID)
 {
 	if (myPrefabs.find(aPrefabID) == myPrefabs.end())
+	{
+		Debug::Error << "Unable to find prefab with ID: " << aPrefabID;
 		return nullptr;
+	}
 	return myPrefabs[aPrefabID];
 }
 
