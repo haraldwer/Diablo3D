@@ -4,9 +4,19 @@
 	"ID":0,
 	"Ext":"json",
 	"Components":[{
-			"System":"MODEL_RENDERER",
-			"Model":1,
-			"Texture":2
+			"System":"Model Renderer",
+			"Properties":[
+				{
+					"Name":"myModelID",
+					"Type":0,
+					"Value":1
+				},
+				{
+					"Name":"myTextureID",
+					"Type":0,
+					"Value":2
+				}
+			]
 		}
 	]
 }

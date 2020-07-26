@@ -10,7 +10,8 @@ public:
 private:
 	void Save();
 	void Load();
-	void Default();
+	void Light();
+	void Dark();
 
 	Preference<CommonUtilities::Vector4<float>> bg;
 	Preference<CommonUtilities::Vector4<float>> text;

@@ -48,37 +48,37 @@ void Preference<T>::Set(const T& val)
 
 inline void Preference<bool>::Load(const rapidjson::Value::Object& aContainer)
 {
-	myValue = Deserialize::Bool(aContainer, GetName().c_str(), myValue);
+	Deserialize::Deserialize(aContainer, GetName().c_str(), myValue);
 }
 
 inline void Preference<float>::Load(const rapidjson::Value::Object& aContainer)
 {
-	myValue = Deserialize::Float(aContainer, GetName().c_str(), myValue);
+	Deserialize::Deserialize(aContainer, GetName().c_str(), myValue);
 }
 
 inline void Preference<int>::Load(const rapidjson::Value::Object& aContainer)
 {
-	myValue = Deserialize::Int(aContainer, GetName().c_str(), myValue);
+	Deserialize::Deserialize(aContainer, GetName().c_str(), myValue);
 }
 
 inline void Preference<std::string>::Load(const rapidjson::Value::Object& aContainer)
 {
-	myValue = Deserialize::String(aContainer, GetName().c_str(), myValue.c_str());
+	Deserialize::Deserialize(aContainer, GetName().c_str(), myValue);
 }
 
 inline void Preference<CommonUtilities::Vector2<float>>::Load(const rapidjson::Value::Object& aContainer)
 {
-	myValue = Deserialize::Vector2(aContainer, GetName().c_str(), myValue);
+	Deserialize::Deserialize(aContainer, GetName().c_str(), myValue);
 }
 
 inline void Preference<CommonUtilities::Vector3<float>>::Load(const rapidjson::Value::Object& aContainer)
 {
-	myValue = Deserialize::Vector3(aContainer, GetName().c_str(), myValue);
+	Deserialize::Deserialize(aContainer, GetName().c_str(), myValue);
 }
 
 inline void Preference<CommonUtilities::Vector4<float>>::Load(const rapidjson::Value::Object& aContainer)
 {
-	myValue = Deserialize::Vector4(aContainer, GetName().c_str(), myValue);
+	Deserialize::Deserialize(aContainer, GetName().c_str(), myValue);
 }
 
 #pragma endregion 

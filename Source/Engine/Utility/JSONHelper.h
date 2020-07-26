@@ -107,138 +107,144 @@ namespace Serialize
 
 namespace Deserialize
 {
-	inline bool Bool(const rapidjson::Value::Object& aContainer, const char* aBoolName, bool aDefault = false)
+	inline bool Deserialize(const rapidjson::Value::Object& aContainer, const char* aBoolName, bool& aVariable, bool aShouldPrint = true)
 	{
 		if (aContainer.HasMember(aBoolName))
 		{
 			if (aContainer[aBoolName].IsBool())
 			{
-				return aContainer[aBoolName].GetBool();
+				aVariable = aContainer[aBoolName].GetBool();
+				return true;
 			}
-			Debug::Warning << aBoolName << " failed to deserialize, value isn't bool" << std::endl;
+			if(aShouldPrint)
+				Debug::Warning << aBoolName << " failed to deserialize, value isn't bool" << std::endl;
 		}
-		else
-		{
-			Debug::Warning << aBoolName << " failed to deserialize, value doesn't exist. Check spelling." << std::endl;
-		}
-		return aDefault;
+		else if(aShouldPrint)
+				Debug::Warning << aBoolName << " failed to deserialize, value doesn't exist. Check spelling." << std::endl;
+		return false;
 	}
 
-	inline float Float(const rapidjson::Value::Object& aContainer, const char* aFloatName, float aDefault = 0)
+	inline bool Deserialize(const rapidjson::Value::Object& aContainer, const char* aFloatName, float& aVariable, bool aShouldPrint = true)
 	{
 		if (aContainer.HasMember(aFloatName))
 		{
 			if (aContainer[aFloatName].IsFloat() || aContainer[aFloatName].IsInt())
 			{
-				return aContainer[aFloatName].GetFloat();
+				aVariable = aContainer[aFloatName].GetFloat();
+				return true;
 			}
-			Debug::Warning << aFloatName << " failed to deserialize, value isn't float" << std::endl;
+			if(aShouldPrint)
+				Debug::Warning << aFloatName << " failed to deserialize, value isn't float" << std::endl;
 		}
-		else
+		else if (aShouldPrint)
 		{
 			Debug::Warning << aFloatName << " failed to deserialize, value doesn't exist. Check spelling." << std::endl;
 		}
-		return aDefault;
+		return false;
 	}
 
-	inline int Int(const rapidjson::Value::Object& aContainer, const char* aIntName, int aDefault = 0)
+	inline bool Deserialize(const rapidjson::Value::Object& aContainer, const char* aIntName, int& aVariable, bool aShouldPrint = true)
 	{
 		if (aContainer.HasMember(aIntName))
 		{
 			if (aContainer[aIntName].IsInt())
 			{
-				return aContainer[aIntName].GetInt();
+				aVariable = aContainer[aIntName].GetInt();
+				return true;
 			}
-			Debug::Warning << aIntName << " failed to deserialize, value isn't int" << std::endl;
+			if (aShouldPrint)
+				Debug::Warning << aIntName << " failed to deserialize, value isn't int" << std::endl;
 		}
-		else
+		else if (aShouldPrint)
 		{
 			Debug::Warning << aIntName << " failed to deserialize, value doesn't exist. Check spelling." << std::endl;
 		}
-		return aDefault;
+		return false;
 	}
 
-	inline std::string String(const rapidjson::Value::Object& aContainer, const char* aStringName, const char* aDefault = "")
+	inline bool Deserialize(const rapidjson::Value::Object& aContainer, const char* aStringName, std::string& aVariable, bool aShouldPrint = true)
 	{
 		if (aContainer.HasMember(aStringName))
 		{
 			if (aContainer[aStringName].IsString() || aContainer[aStringName].IsFloat() || aContainer[aStringName].IsInt())
 			{
-				return aContainer[aStringName].GetString();
+				aVariable = aContainer[aStringName].GetString();
+				return true;
 			}
-			Debug::Warning << aStringName << " failed to deserialize, value isn't string" << std::endl;
+			if (aShouldPrint)
+				Debug::Warning << aStringName << " failed to deserialize, value isn't string" << std::endl;
 		}
-		else
+		else if (aShouldPrint)
 		{
 			Debug::Warning << aStringName << " failed to deserialize, value doesn't exist. Check spelling." << std::endl;
 		}
-		return aDefault;
+		return false;
 	}
 
-	inline CommonUtilities::Vector2<float> Vector2(const rapidjson::Value::Object& aContainer, const char* aVectorName, const CommonUtilities::Vector2<float>& aDefault = { 0, 0 })
+	inline bool Deserialize(const rapidjson::Value::Object& aContainer, const char* aVectorName, CommonUtilities::Vector2<float>& aVariable, bool aShouldPrint = true)
 	{
 		if (aContainer.HasMember(aVectorName))
 		{
 			if (aContainer[aVectorName].IsObject())
 			{
-				return {
-					Float(aContainer[aVectorName].GetObject(), "x"),
-					Float(aContainer[aVectorName].GetObject(), "y")
-				};
+				Deserialize(aContainer[aVectorName].GetObject(), "x", aVariable.x);
+				Deserialize(aContainer[aVectorName].GetObject(), "y", aVariable.y);
+				return true;
 			}
-			Debug::Warning << aVectorName << " failed to deserialize, value isn't vector" << std::endl;
+			if (aShouldPrint)
+				Debug::Warning << aVectorName << " failed to deserialize, value isn't vector" << std::endl;
 		}
-		else
+		else if (aShouldPrint)
 		{
 			Debug::Warning << aVectorName << " failed to deserialize, value doesn't exist. Check spelling." << std::endl;
 		}
-		return aDefault;
+		return false;
 	}
 
-	inline CommonUtilities::Vector3<float> Vector3(const rapidjson::Value::Object& aContainer, const char* aVectorName, const CommonUtilities::Vector3<float>& aDefault = { 0, 0, 0 })
+	inline bool Deserialize(const rapidjson::Value::Object& aContainer, const char* aVectorName, CommonUtilities::Vector3<float>& aVariable, bool aShouldPrint = true)
 	{
 		if (aContainer.HasMember(aVectorName))
 		{
 			if (aContainer[aVectorName].IsObject())
 			{
-				return {
-					Float(aContainer[aVectorName].GetObject(), "x"),
-					Float(aContainer[aVectorName].GetObject(), "y"),
-					Float(aContainer[aVectorName].GetObject(), "z")
-				};
+				Deserialize(aContainer[aVectorName].GetObject(), "x", aVariable.x);
+				Deserialize(aContainer[aVectorName].GetObject(), "y", aVariable.y);
+				Deserialize(aContainer[aVectorName].GetObject(), "z", aVariable.z);
+				return true;
 			}
-			Debug::Warning << aVectorName << " failed to deserialize, value isn't vector" << std::endl;
+			if (aShouldPrint)
+				Debug::Warning << aVectorName << " failed to deserialize, value isn't vector" << std::endl;
 		}
-		else
+		else if (aShouldPrint)
 		{
 			Debug::Warning << aVectorName << " failed to deserialize, value doesn't exist. Check spelling." << std::endl;
 		}
-		return aDefault;
+		return false;
 	}
 	
-	inline CommonUtilities::Vector4<float> Vector4(const rapidjson::Value::Object& aContainer, const char* aVectorName, const CommonUtilities::Vector4<float>& aDefault = { 0, 0, 0, 0 })
+	inline bool Deserialize(const rapidjson::Value::Object& aContainer, const char* aVectorName, CommonUtilities::Vector4<float>& aVariable, bool aShouldPrint = true)
 	{
 		if (aContainer.HasMember(aVectorName))
 		{
 			if (aContainer[aVectorName].IsObject())
 			{
-				return {
-					Float(aContainer[aVectorName].GetObject(), "x"),
-					Float(aContainer[aVectorName].GetObject(), "y"),
-					Float(aContainer[aVectorName].GetObject(), "z"),
-					Float(aContainer[aVectorName].GetObject(), "w")
-				};
+				Deserialize(aContainer[aVectorName].GetObject(), "x", aVariable.x);
+				Deserialize(aContainer[aVectorName].GetObject(), "y", aVariable.y);
+				Deserialize(aContainer[aVectorName].GetObject(), "z", aVariable.z);
+				Deserialize(aContainer[aVectorName].GetObject(), "w", aVariable.w);
+				return true;
 			}
-			Debug::Warning << aVectorName << " failed to deserialize, value isn't vector" << std::endl;
+			if (aShouldPrint)
+				Debug::Warning << aVectorName << " failed to deserialize, value isn't vector" << std::endl;
 		}
-		else
+		else if (aShouldPrint)
 		{
 			Debug::Warning << aVectorName << " failed to deserialize, value doesn't exist. Check spelling." << std::endl;
 		}
-		return aDefault;
+		return false;
 	}
 
-	inline CommonUtilities::Matrix4x4<float> Matrix(const rapidjson::Value::Object& aContainer, const char* aVectorName)
+	inline bool Deserialize(const rapidjson::Value::Object& aContainer, const char* aVectorName, CommonUtilities::Matrix4x4<float>& aVariable, bool aShouldPrint = true)
 	{
 		CommonUtilities::Matrix4x4<float> matrix;
 		if (aContainer.HasMember(aVectorName))
@@ -257,14 +263,17 @@ namespace Deserialize
 						row++;
 					}
 				}
-				return matrix;
+				aVariable = matrix;
+				return true;
 			}
-			Debug::Warning << aVectorName << " failed to deserialize, value isn't matrix" << std::endl;
+			if (aShouldPrint)
+				Debug::Warning << aVectorName << " failed to deserialize, value isn't matrix" << std::endl;
 		}
 		else
 		{
-			Debug::Warning << aVectorName << " failed to deserialize, value doesn't exist. Check spelling." << std::endl;
+			if (aShouldPrint)
+				Debug::Warning << aVectorName << " failed to deserialize, value doesn't exist. Check spelling." << std::endl;
 		}
-		return matrix;
+		return false;
 	}
 }

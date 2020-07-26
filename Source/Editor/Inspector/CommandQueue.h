@@ -2,15 +2,15 @@
 #include <functional>
 #include <vector>
 #include "../../CommonUtilities/OpaqueDictionary.hpp"
-#include "../../Engine/Entity/Entity.h"
-#include "../../Engine/Scenes/Scene.h"
+#include "../../Engine/ResouceIDs.h"
 
 struct Command
 {
 	enum class Type
 	{
 		TRANSFORM,
-		PROPERTY
+		PROPERTY,
+		ENTITY
 	};
 
 	EntityID entityID;
@@ -18,6 +18,7 @@ struct Command
 	CommonUtilities::OpaqueDictionary<int> data;
 	std::function<void(Command& command)> revert;
 	std::function<void(Command& command)> redo;
+	std::function<void(Command& command)> erase;
 };
 
 

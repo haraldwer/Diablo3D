@@ -182,17 +182,25 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ECS\CContainer.h" />
+    <ClInclude Include="ECS\Data\SerializableBase.h" />
+    <ClInclude Include="ECS\SystemBase.h" />
+    <ClInclude Include="ECS\Data\Container.h" />
     <ClInclude Include="ECS\CSystems.h" />
-    <ClInclude Include="ECS\ComponentSystems\CModelRenderer.h" />
+    <ClInclude Include="ECS\ComponentSystems\ModelRenderer.h" />
     <ClInclude Include="ECS\CSystemManager.h" />
-    <ClInclude Include="ECS\CSystem.h" />
+    <ClInclude Include="ECS\System.h" />
     <ClInclude Include="Engine.h" />
     <ClInclude Include="EngineResources\EngineResource.h" />
+    <ClInclude Include="ECS\Data\EntityData.h" />
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Entity\Prefab.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="ECS\Data\PrefabData.h" />
     <ClInclude Include="ResouceIDs.h" />
+    <ClInclude Include="ECS\Data\Serializable.h" />
+    <ClInclude Include="ECS\Data\Stored.h" />
+    <ClInclude Include="ECS\Data\StoredBase.h" />
+    <ClInclude Include="ECS\ComponentSystems\Rigidbody.h" />
     <ClInclude Include="Utility\Input.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="EngineResources\ResourceManager.h" />
@@ -224,13 +232,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="ECS\ComponentSystems\CModelRenderer.cpp" />
+    <ClCompile Include="ECS\ComponentSystems\ModelRenderer.cpp" />
     <ClCompile Include="ECS\CSystemManager.cpp" />
-    <ClCompile Include="ECS\CSystem.cpp" />
+    <ClCompile Include="ECS\Data\SerializableBase.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EngineResources\EngineResource.cpp" />
+    <ClCompile Include="ECS\Data\EntityData.cpp" />
     <ClCompile Include="Entity\Entity.cpp" />
     <ClCompile Include="Entity\Prefab.cpp" />
+    <ClCompile Include="ECS\Data\PrefabData.cpp" />
+    <ClCompile Include="ECS\ComponentSystems\Rigidbody.cpp" />
     <ClCompile Include="Utility\Input.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="EngineResources\ResourceManager.cpp" />

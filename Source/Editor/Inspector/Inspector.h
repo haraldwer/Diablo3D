@@ -4,6 +4,7 @@
 #include "CommandQueue.h"
 #include "../Preferences.h"
 
+class SerializableBase;
 
 class Inspector
 {
@@ -15,6 +16,7 @@ public:
 private:
 	Entity* GetEntity(const SceneID aScene, const EntityID aEntity);
 	void EditTranform(Transform& aTransform);
+	void EditComponents(Entity* anEntity);
 	void Duplicate();
 	void Save();
 	
@@ -24,5 +26,6 @@ private:
 
 	Engine* myEngine;
 	CommandQueue myCommandQueue;
-};
 
+	std::unordered_map<std::type_index, std::function<void(SerializableBase* aBase)>> mySerializableFunctions;
+};

@@ -1,6 +1,6 @@
 #include "PrefabManager.h"
 #include "Prefab.h"
-#include "Engine/ECS/CSystem.h"
+#include "Engine/ECS/System.h"
 #include "Engine/ECS/CSystemManager.h"
 #include "Engine/EngineResources/EngineResource.h"
 #include "Engine/EngineResources/ResourceManager.h"

@@ -4,6 +4,8 @@ void CommandQueue::Add(Command* aCommand)
 {
 	while(off > 0)
 	{
+		if (myCommands[myCommands.size() - 1]->erase)
+			myCommands[myCommands.size() - 1]->erase(*aCommand);
 		delete myCommands[myCommands.size() - 1];
 		myCommands.erase(myCommands.begin() + myCommands.size() - 1);
 		off--;

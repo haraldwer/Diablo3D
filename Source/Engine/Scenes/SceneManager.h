@@ -2,6 +2,8 @@
 #include "Scene.h"
 #include "../Utility/ServiceLocator.h"
 
+class EngineResource;
+
 class SceneManager : public Service<SceneManager>
 {
 public:

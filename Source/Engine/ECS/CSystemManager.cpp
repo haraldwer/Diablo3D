@@ -1,9 +1,9 @@
 #include "CSystemManager.h"
-#include "CSystem.h"
+#include "System.h"
 #include "CSystems.h"
 #include "ImGui/imgui.h"
 
-std::vector<CSystemBase*> CSystemManager::mySystems;
+std::vector<SystemBase*> CSystemManager::mySystems;
 CSystemManager* CSystemManager::instance = nullptr;
 
 CSystemManager::CSystemManager() : mySystemsClass(nullptr)
@@ -29,7 +29,7 @@ void CSystemManager::Init()
 	
 	for (auto& it : mySystems)
 	{
-		mySystemMap[it->GetSystemName()] = it;
+		mySystemMap[it->GetName()] = it;
 		mySystemHashMap[it->GetTypeIndex()] = it;
 	}
 
@@ -45,7 +45,7 @@ void CSystemManager::Update()
 		it->Update();
 }
 
-CSystemBase* CSystemManager::GetSystem(const std::string& aSystemName)
+SystemBase* CSystemManager::GetSystem(const std::string& aSystemName)
 {
 	const auto find = mySystemMap.find(aSystemName);
 	if (find == mySystemMap.end())
@@ -56,7 +56,7 @@ CSystemBase* CSystemManager::GetSystem(const std::string& aSystemName)
 	return find->second;
 }
 
-CSystemBase* CSystemManager::GetSystem(const std::type_index& aSystemTypeIndex)
+SystemBase* CSystemManager::GetSystem(const std::type_index& aSystemTypeIndex)
 {
 	const auto find = mySystemHashMap.find(aSystemTypeIndex);
 	if (find == mySystemHashMap.end())
@@ -86,5 +86,15 @@ void CSystemManager::RemoveEntity(const EntityID anEntityID, const std::vector<s
 		auto sys = GetSystem(it);
 		if (sys)
 			sys->RemoveEntity(anEntityID);
+	}
+}
+
+void CSystemManager::SetEntityEnabled(const EntityID anEntityID, const std::vector<std::type_index>& someSystemTypes, bool aEnabled)
+{
+	for (auto& it : someSystemTypes)
+	{
+		auto sys = GetSystem(it);
+		if (sys)
+			sys->SetEntityEnabled(anEntityID, aEnabled);
 	}
 }

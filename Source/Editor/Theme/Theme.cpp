@@ -20,14 +20,11 @@ void Theme::Init()
 void Theme::Update()
 {
 	EditorColorPicker::Select();
-	if (ImGui::Button("Reset", ImVec2(-1, 0)))
-	{
-		Default();
-	}
-	else
-	{
-		EditorColorPicker::Apply();
-	}
+	if (ImGui::Button("Light", ImVec2(-1, 0)))
+		Light();
+	if (ImGui::Button("Dark", ImVec2(-1, 0)))
+		Dark();
+	EditorColorPicker::Apply();
 	Save();
 }
 
@@ -54,7 +51,7 @@ void Theme::Load()
 	EditorColorPicker::Apply();
 }
 
-void Theme::Default()
+void Theme::Light()
 {
 	EditorColorPicker::base = ImVec4(1, 1, 1, 0);
 	float val = 200.0f / 255.0f;
@@ -64,5 +61,16 @@ void Theme::Default()
 	EditorColorPicker::mid_val = 0.75f;
 	EditorColorPicker::low_val = 1.0f;
 	EditorColorPicker::window_offset = 1.0f;
-	EditorColorPicker::Apply();
+}
+
+void Theme::Dark()
+{
+	EditorColorPicker::base = ImVec4(1, 1, 1, 1);
+	float val = 50.0f / 255.0f;
+	EditorColorPicker::bg = ImVec4(val, val, val, 1);
+	EditorColorPicker::text = ImVec4(1, 1, 1, 1);
+	EditorColorPicker::high_val = 0.35f;
+	EditorColorPicker::mid_val = 0.25f;
+	EditorColorPicker::low_val = 0.15f;
+	EditorColorPicker::window_offset = -0.4f;
 }

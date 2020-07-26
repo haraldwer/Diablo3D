@@ -1,8 +1,12 @@
 #pragma once
-#include "ComponentSystems//CModelRenderer.h"
+#include "ComponentSystems/ModelRenderer.h"
+#include "ComponentSystems/Rigidbody.h"
 
 class CSystems
-{	
+{
+	// Put every system here
+	
 	// Engine components
-	CModelRenderer myModelRenderer;
+	ModelRenderer myModelRenderer;
+	Rigidbody myRigidbody;
 };

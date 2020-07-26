@@ -6,11 +6,18 @@
 
 struct EntitySlot
 {
-	EntitySlot() : myObject(), myInUse(false)
+	enum class Status
+	{
+		EMPTY,
+		USED,
+		HIDDEN,
+	};
+	
+	EntitySlot() : myObject(), myStatus(Status::EMPTY)
 	{
 	}
 	Entity myObject;
-	bool myInUse;
+	Status myStatus;
 };
 
 class Scene
@@ -23,6 +30,9 @@ public:
 	std::string GetPath() const;
 	SceneID GetID() const;
 	std::vector<EntityID> GetEntities();
+	bool HideEntity(EntityID anID);
+	bool ShowEntity(EntityID anID);
+	
 	
 	void Load(rapidjson::Document& aDoc);
 	void Save();

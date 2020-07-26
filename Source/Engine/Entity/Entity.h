@@ -1,7 +1,6 @@
 #pragma once
-#include "Prefab.h"
 #include "Transform.h"
-#include "../RapidJSON/writer.h"
+#include "../Utility/JSONHelper.h"
 #include "../ResouceIDs.h"
 #include <typeindex>
 
@@ -12,8 +11,12 @@ public:
 	EntityID GetID() const;
 	PrefabID GetPrefabID() const;
 	Transform& GetTransform();
-	void Save(rapidjson::Writer<rapidjson::StringBuffer>& aBase) const;
+	void Serialize(rapidjson::Writer<rapidjson::StringBuffer>& aBase) const;
+	void Deserialize(const rapidjson::Value::Object& aContainer);
 	bool Destroy();
+	void SetEnabled(bool aEnabled);
+	bool GetEnabled() const;
+	std::vector<std::type_index> GetSystemRefs() const;
 
 private:
 	void AddSystem(const std::type_index& aTypeIndex);
@@ -23,6 +26,7 @@ private:
 	PrefabID myPrefabID;
 	SceneID mySceneID;
 	Transform myTransform;
+	bool myEnabled;
 	std::vector<std::type_index> mySystemRefs;
 };
 

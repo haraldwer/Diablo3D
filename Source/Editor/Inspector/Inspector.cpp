@@ -1,9 +1,21 @@
 #include "Inspector.h"
 #include "../Viewport.h"
 #include "../Hierarchy.h"
+#include "../../Engine/ECS/SystemBase.h"
+#include "../../Engine/ECS/Data/SerializableBase.h"
+#include "../../Engine/ECS/Data/Serializable.h"
+#include "EditSerializable.h"
 
-Inspector::Inspector(): mySelectedID("InspectorSelectedID", -1), mySelectedScene("InspectorSelectedSceneID", -1)
+Inspector::Inspector(): mySelectedID("InspectorSelectedID", -1), mySelectedScene("InspectorSelectedSceneID", -1), myEngine(nullptr)
 {
+	mySerializableFunctions[std::type_index(typeid(int))] =									EditInt;
+	mySerializableFunctions[std::type_index(typeid(float))] =								EditFloat;
+	mySerializableFunctions[std::type_index(typeid(std::string))] =							EditString;
+	mySerializableFunctions[std::type_index(typeid(bool))] =								EditBool;
+	mySerializableFunctions[std::type_index(typeid(Vec2F))] =								EditVec2;
+	mySerializableFunctions[std::type_index(typeid(Vec3F))] =								EditVec3;
+	mySerializableFunctions[std::type_index(typeid(CommonUtilities::Vector4<float>))] =		EditVec4;
+	//mySerializableFunctions[std::type_index(typeid(CommonUtilities::Matrix4x4<float>))] =	EditMatrix;
 }
 
 bool Inspector::GetIsSelected(SceneID aSceneID, EntityID aEntityID)
@@ -60,6 +72,38 @@ void Inspector::EditTranform(Transform& aTransform)
 	myCommandQueue.Add(c);
 }
 
+void Inspector::EditComponents(Entity* anEntity)
+{
+	if (!anEntity)
+		return;
+	
+	ServiceLocator& serviceLocator = myEngine->GetServiceLocator();
+	auto& sysMan = serviceLocator.GetService<CSystemManager>();
+	auto comps = anEntity->GetSystemRefs();
+	for(auto& comp : comps)
+	{
+		auto sys = sysMan.GetSystem(comp);
+		if (!sys)
+		{
+			ImGui::CollapsingHeader("Unable to find system reference");
+			continue;
+		}
+		
+		if (ImGui::CollapsingHeader(sys->GetName().c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::PushID(sys);
+			auto& properties = sys->GetEntityProperties(anEntity->GetID());
+			for(auto& it : properties)
+			{
+				auto type = it.second->GetType();
+				if (mySerializableFunctions[type])
+					mySerializableFunctions[type](it.second);
+			}
+			ImGui::PopID();
+		}
+	}
+}
+
 void Inspector::Update(Gizmo& aGizmo, Engine* anEngine)
 {
 	myEngine = anEngine;
@@ -86,6 +130,8 @@ void Inspector::Update(Gizmo& aGizmo, Engine* anEngine)
 	else
 		if(myIsManipulating)
 			myIsManipulating = false;
+
+	EditComponents(entity);
 
 	if (ImGui::IsWindowFocused() || Viewport::IsFocused() || Hierarchy::IsFocused())
 	{

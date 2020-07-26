@@ -5,30 +5,31 @@
 #include "../Utility/ServiceLocator.h"
 #include "../Entity/PrefabManager.h"
 
-class CSystemBase;
+class SystemBase;
 class CSystems;
 class EngineResource;
 
 class CSystemManager : public Service<CSystemManager>
 {
-	friend class CSystemBase;
+	friend class SystemBase;
 public:
 	CSystemManager();
 	~CSystemManager();
 	void Init();
 	void Update();
-	CSystemBase* GetSystem(const std::string& aSystemName);
-	CSystemBase* GetSystem(const std::type_index& aSystemTypeIndex);
+	SystemBase* GetSystem(const std::string& aSystemName);
+	SystemBase* GetSystem(const std::type_index& aSystemTypeIndex);
 	template <class T>
 	T* GetSystem();
 	std::string GetName() override { return "CS Manager"; }
 	void Editor() override;
 	void RemoveEntity(const EntityID anEntityID, const std::vector<std::type_index>& someSystemTypes);
+	void SetEntityEnabled(const EntityID anEntityID, const std::vector<std::type_index>& someSystemTypes, bool aEnabled);
 private:
-	static std::vector<CSystemBase*> mySystems;
+	static std::vector<SystemBase*> mySystems;
 	static CSystemManager* instance;
-	std::unordered_map<std::string, CSystemBase*> mySystemMap;
-	std::unordered_map<std::type_index, CSystemBase*> mySystemHashMap;
+	std::unordered_map<std::string, SystemBase*> mySystemMap;
+	std::unordered_map<std::type_index, SystemBase*> mySystemHashMap;
 	CSystems* mySystemsClass;
 	PrefabManager myPrefabManager;
 };
