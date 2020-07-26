@@ -33,10 +33,9 @@ public:
 	bool HideEntity(EntityID anID);
 	bool ShowEntity(EntityID anID);
 	
-	
 	void Load(rapidjson::Document& aDoc);
 	void Save();
-	
+
 private:
 	const SceneID myID;
 	const std::string myPath;

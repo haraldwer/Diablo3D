@@ -9,6 +9,7 @@ public:
 	virtual ~System() = default;
 	Container<EntityData>& GetContainer(); // Because of inheritance
 	std::unordered_map<std::string, SerializableBase*>& GetEntityProperties(EntityID anID) override;
+	SerializableBase* GetEntityProperty(EntityID anID, const std::string& aPropertyName) override;
 	
 private:
 	virtual void AddEntity(Entity* anEntity) override;
@@ -35,6 +36,17 @@ std::unordered_map<std::string, SerializableBase*>& System<CS, EntityData>::GetE
 {
 	auto& data = myContainer.GetData(anID);
 	return data.GetSerializable();
+}
+
+template <class CS, class EntityData>
+SerializableBase* System<CS, EntityData>::GetEntityProperty(EntityID anID, const std::string& aPropertyName)
+{
+	auto& data = myContainer.GetData(anID);
+	auto& serializable = data.GetSerializable();
+	auto ptr = serializable.find(aPropertyName);
+	if (ptr == serializable.end())
+		return nullptr;
+	return ptr->second;
 }
 
 template <class CS, class EntityData>

@@ -5,16 +5,17 @@
 //#include "EditSerializable.h"
 #include  "../ImGui/misc/cpp/imgui_stdlib.h"
 
+#define SERIALIZABLE_FUNC(type, func) mySerializableFunctions[std::type_index(typeid(type))] = [&](SerializableBase* base, CommandQueue& queue, const std::string& aSystemName) { func(base, queue, aSystemName); };
+
 Inspector::Inspector(): mySelectedID("InspectorSelectedID", -1), mySelectedScene("InspectorSelectedSceneID", -1), myEngine(nullptr)
 {
-	mySerializableFunctions[std::type_index(typeid(int))] =									[&](SerializableBase* base, CommandQueue& queue) { EditInt(base, queue); };
-	mySerializableFunctions[std::type_index(typeid(float))] =								[&](SerializableBase* base, CommandQueue& queue) { EditFloat(base, queue); };
-	mySerializableFunctions[std::type_index(typeid(std::string))] =							[&](SerializableBase* base, CommandQueue& queue) { EditString(base, queue); };
-	mySerializableFunctions[std::type_index(typeid(bool))] =								[&](SerializableBase* base, CommandQueue& queue) { EditBool(base, queue); };
-	mySerializableFunctions[std::type_index(typeid(Vec2F))] =								[&](SerializableBase* base, CommandQueue& queue) { EditVec2(base, queue); };
-	mySerializableFunctions[std::type_index(typeid(Vec3F))] =								[&](SerializableBase* base, CommandQueue& queue) { EditVec3(base, queue); };
-	mySerializableFunctions[std::type_index(typeid(CommonUtilities::Vector4<float>))] =		[&](SerializableBase* base, CommandQueue& queue) { EditVec4(base, queue); };
-	//mySerializableFunctions[std::type_index(typeid(CommonUtilities::Matrix4x4<float>))] =	EditMatrix;
+	SERIALIZABLE_FUNC(int								, EditInt);
+	SERIALIZABLE_FUNC(float								, EditFloat);
+	SERIALIZABLE_FUNC(std::string						, EditString);
+	SERIALIZABLE_FUNC(bool								, EditBool);
+	SERIALIZABLE_FUNC(Vec2F								, EditVec2);
+	SERIALIZABLE_FUNC(Vec3F								, EditVec3);
+	SERIALIZABLE_FUNC(CommonUtilities::Vector4<float>	, EditVec4);
 }
 
 bool Inspector::GetIsSelected(SceneID aSceneID, EntityID aEntityID)
@@ -22,7 +23,7 @@ bool Inspector::GetIsSelected(SceneID aSceneID, EntityID aEntityID)
 	return (aSceneID == mySelectedScene.Get() && aEntityID == mySelectedID.Get());
 }
 
-Entity* Inspector::GetEntity(SceneID sceneID, EntityID entityID)
+Entity* Inspector::GetEntity(SceneID sceneID, EntityID entityID) const
 {
 	if (!myEngine)
 		return nullptr;
@@ -96,7 +97,7 @@ void Inspector::EditComponents(Entity* anEntity)
 			{
 				auto type = it.second->GetType();
 				if (mySerializableFunctions[type])
-					mySerializableFunctions[type](it.second, myCommandQueue);
+					mySerializableFunctions[type](it.second, myCommandQueue, sys->GetName());
 			}
 			ImGui::PopID();
 		}
@@ -115,27 +116,28 @@ void Inspector::Update(Gizmo& aGizmo, Engine* anEngine)
 		mySelectedScene.Set(-1);
 		mySelectedID.Set(-1);
 		ImGui::Text("No entity selected");
-		return;
-	}
-	
-	if (aGizmo.Manipulate(entity->GetTransform()))
-	{
-		if(!myIsManipulating)
-		{
-			EditTranform(entity->GetTransform());
-			myIsManipulating = true;
-		}
 	}
 	else
-		if(myIsManipulating)
-			myIsManipulating = false;
+	{
+		if (aGizmo.Manipulate(entity->GetTransform()))
+		{
+			if(!myIsManipulating)
+			{
+				EditTranform(entity->GetTransform());
+				myIsManipulating = true;
+			}
+		}
+		else
+			if(myIsManipulating)
+				myIsManipulating = false;
 
-	EditComponents(entity);
-
+		EditComponents(entity);
+	}
+	
 	if (ImGui::IsWindowFocused() || Viewport::IsFocused() || Hierarchy::IsFocused())
 	{
 		Input& input = myEngine->GetServiceLocator().GetService<Input>();
-		if (!Hierarchy::IsFocused() && input.Get(VK_CONTROL))
+		if (input.Get(VK_CONTROL))
 		{
 			if (input.GetPressed('Z'))
 				myCommandQueue.Revert();
@@ -148,8 +150,7 @@ void Inspector::Update(Gizmo& aGizmo, Engine* anEngine)
 		}
 		if (input.GetPressed(VK_DELETE))
 		{
-			entity->Destroy();
-			SetEntity(-1, -1);
+			Delete();
 		}
 	}
 }
@@ -175,6 +176,9 @@ void Inspector::Save()
 
 void Inspector::Duplicate()
 {
+	if (!myEngine)
+		return;
+	
 	if(mySelectedID.Get() == -1 || mySelectedScene.Get() == -1)
 	{
 		Debug::Error << "Unable to duplicate entity, no entity selected" << std::endl;
@@ -189,19 +193,134 @@ void Inspector::Duplicate()
 		return;
 	}
 	Entity* entity = GetEntity(mySelectedScene.Get(), mySelectedID.Get());
-	if (!scene)
+	if (!entity)
 	{
 		Debug::Error << "Unable to find entity with ID " << mySelectedID.Get() << std::endl;
 		return;
 	}
+	
 	auto duplicate = scene->CreateEntity(entity->GetPrefabID());
-	duplicate->GetTransform().SetMatrix(entity->GetTransform().GetMatrix());
-	// Also transfer component overrides!
+	if(!duplicate)
+	{
+		Debug::Error << "Unable to create duplicate of entity with ID " << mySelectedID.Get() << std::endl;
+		return;
+	}
 
+	// Copy transform
+	duplicate->GetTransform().SetMatrix(entity->GetTransform().GetMatrix());
+	
+	// Also copy component overrides!
+	auto sys = entity->GetSystemRefs();
+	auto& cSysMan = serviceLocator.GetService<CSystemManager>();
+	for(auto& it : sys)
+	{
+		auto sys = cSysMan.GetSystem(it);
+		if (!sys)
+			continue;
+		auto& src = sys->GetEntityProperties(entity->GetID());
+		auto& dest = sys->GetEntityProperties(duplicate->GetID());
+		for(auto& it : src)
+		{
+			auto find = dest.find(it.first);
+			if(find != dest.end())
+				find->second->Copy(it.second);
+		}
+	}
+	
+	SetEntity(duplicate->GetSceneID(), duplicate->GetID());
+
+	// And add to command queue
+	HideShowCommand(false);
 	Debug::Log << "Entity duplicated" << std::endl;
 }
 
-void Inspector::EditInt(SerializableBase* base, CommandQueue& queue)
+void Inspector::Delete()
+{
+	HideShowCommand(true);
+}
+
+void Inspector::HideShowCommand(bool aPerform)
+{
+	auto c = new Command();
+	c->entityID = mySelectedID.Get();
+	c->sceneID = mySelectedScene.Get();
+	
+	std::function<void(Command& aCommand)> recover = [&](Command& aCommand)
+	{
+		// Recover
+		if (!myEngine)
+			return;
+		if (aCommand.sceneID == -1)
+			return;
+		if (aCommand.entityID == -1)
+			return;
+		ServiceLocator& serviceLocator = myEngine->GetServiceLocator();
+		SceneManager& sceneManager = serviceLocator.GetService<SceneManager>();
+		Scene* scene = sceneManager.GetScene(aCommand.sceneID);
+		if (!scene)
+			return;
+		if (!scene->ShowEntity(aCommand.entityID))
+			return;
+		Entity* entity = GetEntity(aCommand.sceneID, aCommand.entityID);
+		if (!entity)
+			return;
+		mySelectedScene.Set(aCommand.sceneID);
+		mySelectedID.Set(aCommand.entityID);
+		//aCommand.erase = [](Command& c) {};
+	};
+	
+	std::function<void(Command& aCommand)> hide = [&](Command& aCommand)
+	{
+		// Delete
+		if (!myEngine)
+			return;
+		if (aCommand.sceneID == -1)
+			return;
+		if (aCommand.entityID == -1)
+			return;
+		ServiceLocator& serviceLocator = myEngine->GetServiceLocator();
+		SceneManager& sceneManager = serviceLocator.GetService<SceneManager>();
+		Scene* scene = sceneManager.GetScene(aCommand.sceneID);
+		if (!scene)
+			return;
+		if (!scene->HideEntity(aCommand.entityID))
+			return;
+		SetEntity(-1, -1);
+
+		//aCommand.erase = [&](Command& aCommand2)
+		//{
+		//	// Recover
+		//	if (!myEngine)
+		//		return;
+		//	if (aCommand2.sceneID == -1)
+		//		return;
+		//	if (aCommand2.entityID == -1)
+		//		return;
+		//	ServiceLocator& serviceLocator = myEngine->GetServiceLocator();
+		//	SceneManager& sceneManager = serviceLocator.GetService<SceneManager>();
+		//	Scene* scene = sceneManager.GetScene(aCommand2.sceneID);
+		//	if (!scene)
+		//		return;
+		//	if (!scene->DestroyEntity(aCommand2.entityID))
+		//		return;
+		//};
+	};
+	
+	if(aPerform)
+	{
+		hide(*c);
+		c->revert = recover;
+		c->redo = hide;
+	}
+	else
+	{
+		c->revert = hide;
+		c->redo = recover;
+	}
+	myCommandQueue.Add(c);
+}
+
+void Inspector::EditInt(SerializableBase* base, CommandQueue& queue, const std::string& aSystemName)
 {
 	ImGui::PushID(base);
 	auto ptr = reinterpret_cast<Serializable<int>*>(base);
@@ -218,12 +337,12 @@ void Inspector::EditInt(SerializableBase* base, CommandQueue& queue)
 
 	auto itr = funcMap.find(base->GetEditorControls());
 	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
-		Edit(ptr, data, queue);
+		Edit(ptr, data, queue, aSystemName);
 	Apply<int>(ptr);
 	ImGui::PopID();
 }
 
-void Inspector::EditFloat(SerializableBase* base, CommandQueue& queue)
+void Inspector::EditFloat(SerializableBase* base, CommandQueue& queue, const std::string& aSystemName)
 {
 	ImGui::PushID(base);
 	auto ptr = reinterpret_cast<Serializable<float>*>(base);
@@ -234,17 +353,18 @@ void Inspector::EditFloat(SerializableBase* base, CommandQueue& queue)
 	if (funcMap.empty())
 	{
 		funcMap[EditorControls::NONE] = [] { return false; };
+		funcMap[EditorControls::INPUT_FLOAT] = [&] { return ImGui::InputFloat(name.c_str(), &data); };
 		funcMap[EditorControls::DEFAULT] = [&] { return ImGui::DragFloat(name.c_str(), &data); };
 	}
 
 	auto itr = funcMap.find(base->GetEditorControls());
 	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
-		Edit(ptr, data, queue);
+		Edit(ptr, data, queue, aSystemName);
 	Apply<float>(ptr);
 	ImGui::PopID();
 }
 
-void Inspector::EditBool(SerializableBase* base, CommandQueue& queue)
+void Inspector::EditBool(SerializableBase* base, CommandQueue& queue, const std::string& aSystemName)
 {
 	ImGui::PushID(base);
 	auto ptr = reinterpret_cast<Serializable<bool>*>(base);
@@ -255,16 +375,17 @@ void Inspector::EditBool(SerializableBase* base, CommandQueue& queue)
 	if (funcMap.empty())
 	{
 		funcMap[EditorControls::NONE] = [] { return false; };
+		funcMap[EditorControls::BUTTON] = [&] { data = ImGui::Button(name.c_str()); return data; };
 		funcMap[EditorControls::DEFAULT] = [&] { return ImGui::Checkbox(name.c_str(), &data); };
 	}
 	auto itr = funcMap.find(base->GetEditorControls());
 	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
-		Edit(ptr, data, queue);
+		Edit(ptr, data, queue, aSystemName);
 	Apply<bool>(ptr);
 	ImGui::PopID();
 }
 
-void Inspector::EditString(SerializableBase* base, CommandQueue& queue)
+void Inspector::EditString(SerializableBase* base, CommandQueue& queue, const std::string& aSystemName)
 {
 	ImGui::PushID(base);
 	auto ptr = reinterpret_cast<Serializable<std::string>*>(base);
@@ -279,12 +400,12 @@ void Inspector::EditString(SerializableBase* base, CommandQueue& queue)
 	}
 	auto itr = funcMap.find(base->GetEditorControls());
 	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
-		Edit(ptr, data, queue);
+		Edit(ptr, data, queue, aSystemName);
 	Apply<std::string>(ptr);
 	ImGui::PopID();
 }
 
-void Inspector::EditVec2(SerializableBase* base, CommandQueue& queue)
+void Inspector::EditVec2(SerializableBase* base, CommandQueue& queue, const std::string& aSystemName)
 {
 	ImGui::PushID(base);
 	auto ptr = reinterpret_cast<Serializable<Vec2F>*>(base);
@@ -295,6 +416,17 @@ void Inspector::EditVec2(SerializableBase* base, CommandQueue& queue)
 	if (funcMap.empty())
 	{
 		funcMap[EditorControls::NONE] = [] { return false; };
+		funcMap[EditorControls::INPUT_FLOAT] = [&]
+		{
+			if (ImGui::InputFloat2(name.c_str(), val))
+			{
+				data.x = val[0];
+				data.y = val[1];
+				ptr->Set(data);
+				return true;
+			}
+			return false;
+		};
 		funcMap[EditorControls::DEFAULT] = [&]
 		{
 			if (ImGui::DragFloat2(name.c_str(), val))
@@ -309,12 +441,12 @@ void Inspector::EditVec2(SerializableBase* base, CommandQueue& queue)
 	}
 	auto itr = funcMap.find(base->GetEditorControls());
 	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
-		Edit(ptr, data, queue);
+		Edit(ptr, data, queue, aSystemName);
 	Apply<Vec2F>(ptr);
 	ImGui::PopID();
 }
 
-void Inspector::EditVec3(SerializableBase* base, CommandQueue& queue)
+void Inspector::EditVec3(SerializableBase* base, CommandQueue& queue, const std::string& aSystemName)
 {
 	ImGui::PushID(base);
 	auto ptr = reinterpret_cast<Serializable<Vec3F>*>(base);
@@ -325,6 +457,30 @@ void Inspector::EditVec3(SerializableBase* base, CommandQueue& queue)
 	if (funcMap.empty())
 	{
 		funcMap[EditorControls::NONE] = [] { return false; };
+		funcMap[EditorControls::COLOR] = [&]
+		{
+			if (ImGui::ColorEdit3(name.c_str(), val))
+			{
+				data.x = val[0];
+				data.y = val[1];
+				data.z = val[2];
+				ptr->Set(data);
+				return true;
+			}
+			return false;
+		};
+		funcMap[EditorControls::INPUT_FLOAT] = [&]
+		{
+			if (ImGui::InputFloat3(name.c_str(), val))
+			{
+				data.x = val[0];
+				data.y = val[1];
+				data.z = val[2];
+				ptr->Set(data);
+				return true;
+			}
+			return false;
+		};
 		funcMap[EditorControls::DEFAULT] = [&]
 		{
 			if (ImGui::DragFloat3(name.c_str(), val))
@@ -340,12 +496,12 @@ void Inspector::EditVec3(SerializableBase* base, CommandQueue& queue)
 	}
 	auto itr = funcMap.find(base->GetEditorControls());
 	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
-		Edit(ptr, data, queue);
+		Edit(ptr, data, queue, aSystemName);
 	Apply<Vec3F>(ptr);
 	ImGui::PopID();
 }
 
-void Inspector::EditVec4(SerializableBase* base, CommandQueue& queue)
+void Inspector::EditVec4(SerializableBase* base, CommandQueue& queue, const std::string& aSystemName)
 {
 	ImGui::PushID(base);
 	auto ptr = reinterpret_cast<Serializable<CommonUtilities::Vector4<float>>*>(base);
@@ -356,6 +512,32 @@ void Inspector::EditVec4(SerializableBase* base, CommandQueue& queue)
 	if (funcMap.empty())
 	{
 		funcMap[EditorControls::NONE] = [] { return false; };
+		funcMap[EditorControls::COLOR] = [&]
+		{
+			if (ImGui::ColorEdit4(name.c_str(), val))
+			{
+				data.x = val[0];
+				data.y = val[1];
+				data.z = val[2];
+				data.z = val[3];
+				ptr->Set(data);
+				return true;
+			}
+			return false;
+		};
+		funcMap[EditorControls::INPUT_FLOAT] = [&]
+		{
+			if (ImGui::InputFloat4(name.c_str(), val))
+			{
+				data.x = val[0];
+				data.y = val[1];
+				data.z = val[2];
+				data.z = val[3];
+				ptr->Set(data);
+				return true;
+			}
+			return false;
+		};
 		funcMap[EditorControls::DEFAULT] = [&]
 		{
 			if (ImGui::DragFloat4(name.c_str(), val))
@@ -372,7 +554,7 @@ void Inspector::EditVec4(SerializableBase* base, CommandQueue& queue)
 	}
 	auto itr = funcMap.find(base->GetEditorControls());
 	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
-		Edit(ptr, data, queue);
+		Edit(ptr, data, queue, aSystemName);
 	Apply<CommonUtilities::Vector4<float>>(ptr);
 	ImGui::PopID();
 }

@@ -12,6 +12,7 @@ public:
 	void Serialize(rapidjson::Writer<rapidjson::StringBuffer>& aBase) override;
 	void Deserialize(const rapidjson::Value::Object& aContainer) override;
 	void SetStored(PrefabData& somePrefabData) override;
+	void Copy(SerializableBase* aBase) override;
 	std::type_index GetType() override;
 	
 	void Set(const T& someData);
@@ -54,6 +55,14 @@ template <class T>
 void Serializable<T>::SetStored(PrefabData& somePrefabData)
 {
 	myStored = somePrefabData.GetStored<T>(GetName());
+}
+
+template <class T>
+void Serializable<T>::Copy(SerializableBase* aBase)
+{
+	auto ptr = reinterpret_cast<Serializable<T>*>(aBase);
+	myData = ptr->myData;
+	myOverride = ptr->myOverride;
 }
 
 template <class T>

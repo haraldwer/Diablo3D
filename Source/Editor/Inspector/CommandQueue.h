@@ -15,7 +15,7 @@ struct Command
 
 	EntityID entityID;
 	SceneID sceneID;
-	CommonUtilities::OpaqueDictionary<int> data;
+	CommonUtilities::OpaqueDictionary<int, 256> data;
 	std::function<void(Command& command)> revert;
 	std::function<void(Command& command)> redo;
 	std::function<void(Command& command)> erase;

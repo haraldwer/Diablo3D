@@ -12,11 +12,20 @@ public:
 	SceneID GetSceneID() const;
 	PrefabID GetPrefabID() const;
 	Transform& GetTransform();
+
+	// Write to json
 	void Serialize(rapidjson::Writer<rapidjson::StringBuffer>& aBase) const;
+	// Load from json
 	void Deserialize(const rapidjson::Value::Object& aContainer);
-	bool Destroy();
+
+	// Will enable / disable this instance completely
 	void SetEnabled(bool aEnabled);
 	bool GetEnabled() const;
+
+	// Recovery is used in the editor for Ctrl + Z, Ctrl + Y
+	bool Destroy();
+
+	// List of systems where this entity has component data
 	std::vector<std::type_index> GetSystemRefs() const;
 	
 private:

@@ -78,12 +78,23 @@ void Hierarchy::Update(Engine* anEngine)
 				name = prefabResource->myName;
 				id = entityID;
 
-				if (ImGui::TreeNodeEx((name + "##" + std::to_string(id)).c_str(), myInspector.GetIsSelected(sceneID, entityID) ? ImGuiTreeNodeFlags_Bullet : ImGuiTreeNodeFlags_Leaf))
-					ImGui::TreePop();
-				if (ImGui::IsItemClicked())
+				const bool open = ImGui::TreeNodeEx((name + "##" + std::to_string(id)).c_str(), myInspector.GetIsSelected(sceneID, entityID) ? ImGuiTreeNodeFlags_Bullet : ImGuiTreeNodeFlags_Leaf);
+
+				if (ImGui::BeginPopupContextItem())
 				{
 					myInspector.SetEntity(sceneID, entityID);
+					if (ImGui::MenuItem("Duplicate"))
+						myInspector.Duplicate();
+					if (ImGui::MenuItem("Delete"))
+						myInspector.Delete();
+					ImGui::EndPopup();
 				}
+				
+				if(open)
+					ImGui::TreePop();
+				
+				if (ImGui::IsItemClicked())
+					myInspector.SetEntity(sceneID, entityID);
 			}
 		}
 	}
