@@ -6,6 +6,7 @@
 #include "../../RapidJSON/document.h"
 #include "../../RapidJSON/writer.h"
 
+class Transform;
 class Entity;
 class SerializableBase;
 
@@ -40,6 +41,9 @@ private:
 	virtual std::type_index GetTypeIndex() = 0;
 	virtual size_t GetEntityCount() = 0;
 	virtual void SetEntityEnabled(const EntityID anEntityID, bool aEnabled) = 0;
+
+	static EntityID Instantiate(PrefabID aPrefabID, SceneID aSceneID = -1);
+	static EntityID Instantiate(const std::string& aPrefabName, SceneID aSceneID = -1);
 };
 
 template <class T>

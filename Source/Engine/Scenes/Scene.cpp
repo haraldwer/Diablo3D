@@ -15,13 +15,6 @@ Scene::Scene(SceneID anID, const std::string& aPath) : myID(anID), myPath(aPath)
 
 Entity* Scene::CreateEntity(PrefabID aPrefabID)
 {
-	Prefab* prefab = ServiceLocator::Instance().GetService<PrefabManager>().GetPrefab(aPrefabID);
-	if(prefab == nullptr)
-	{
-		Debug::Error << "Unable to find prefab with ID " << aPrefabID << std::endl;
-		return nullptr;
-	}
-	
 	if (myLatestIndex < 0)
 		myLatestIndex = 0;
 
@@ -37,19 +30,30 @@ Entity* Scene::CreateEntity(PrefabID aPrefabID)
 	myObjectPool[myLatestIndex].myStatus = EntitySlot::Status::USED;
 	myObjectPool[myLatestIndex].myObject.Construct(myLatestIndex, aPrefabID, myID);
 	Entity* entity = &myObjectPool[myLatestIndex].myObject;
-	auto& systemManager = ServiceLocator::Instance().GetService<CSystemManager>();
-	auto comp = prefab->GetComponents();
-	for(auto& it : comp)
+
+	if(aPrefabID != -1)
 	{
-		SystemBase* system = systemManager.GetSystem(it);
-		if(!system)
+		Prefab* prefab = ServiceLocator::Instance().GetService<PrefabManager>().GetPrefab(aPrefabID);
+		if (prefab == nullptr)
 		{
-			Debug::Error << "Unable to find system " << it << " for prefab " << prefab->GetName() << std::endl;
-			continue;
+			Debug::Error << "Unable to find prefab with ID " << aPrefabID << std::endl;
+			return nullptr;
 		}
-		system->AddEntity(entity);
-		entity->AddSystem(system->GetTypeIndex());
+		auto& systemManager = ServiceLocator::Instance().GetService<CSystemManager>();
+		auto comp = prefab->GetComponents();
+		for(auto& it : comp)
+		{
+			SystemBase* system = systemManager.GetSystem(it);
+			if(!system)
+			{
+				Debug::Error << "Unable to find system " << it << " for prefab " << prefab->GetName() << std::endl;
+				continue;
+			}
+			system->AddEntity(entity);
+			entity->AddSystem(system->GetTypeIndex());
+		}
 	}
+	
 	return entity;
 }
 

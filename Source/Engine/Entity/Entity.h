@@ -9,6 +9,7 @@ class Entity
 	friend class Scene;
 public:
 	EntityID GetID() const;
+	SceneID GetSceneID() const;
 	PrefabID GetPrefabID() const;
 	Transform& GetTransform();
 	void Serialize(rapidjson::Writer<rapidjson::StringBuffer>& aBase) const;
@@ -17,7 +18,7 @@ public:
 	void SetEnabled(bool aEnabled);
 	bool GetEnabled() const;
 	std::vector<std::type_index> GetSystemRefs() const;
-
+	
 private:
 	void AddSystem(const std::type_index& aTypeIndex);
 	void Construct(const EntityID anID, const PrefabID aPrefabID, const SceneID aSceneID);

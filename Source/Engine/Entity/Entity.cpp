@@ -10,6 +10,11 @@ EntityID Entity::GetID() const
 	return myID;
 }
 
+SceneID Entity::GetSceneID() const
+{
+	return mySceneID;
+}
+
 PrefabID Entity::GetPrefabID() const
 {
 	return myPrefabID;

@@ -40,6 +40,17 @@ Prefab* PrefabManager::GetPrefab(PrefabID aPrefabID)
 	return myPrefabs[aPrefabID];
 }
 
+PrefabID PrefabManager::GetPrefabID(const std::string& aName)
+{
+	const auto find = myPrefabNames.find(aName);
+	if(find == myPrefabNames.end())
+	{
+		Debug::Warning << "Unable to find prefab with name " << aName << std::endl;
+		return -1;
+	}
+	return find->second;
+}
+
 void PrefabManager::Load()
 {
 	auto prefabs = ServiceLocator::Instance().GetService<ResourceManager>().GetResources(ResourceType::PREFAB);
@@ -111,5 +122,6 @@ void PrefabManager::LoadPrefab(EngineResource* resource)
 	prefab->myID = id;
 	prefab->myComponents = systems;
 	prefab->myName = resource->myName;
+	myPrefabNames[prefab->myName] = id;
 	myPrefabs[id] = prefab;
 }

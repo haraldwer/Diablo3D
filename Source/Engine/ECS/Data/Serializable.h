@@ -18,7 +18,8 @@ public:
 	T Get();
 	void Apply();
 	bool IsOverride() const;
-	
+	void Revert();
+
 private:
 	T myData;
 	bool myOverride;
@@ -91,4 +92,12 @@ template <class T>
 bool Serializable<T>::IsOverride() const
 {
 	return myOverride;
+}
+
+template <class T>
+void Serializable<T>::Revert()
+{
+	myOverride = false;
+	if(myStored)
+		myData = myStored->Get();
 }

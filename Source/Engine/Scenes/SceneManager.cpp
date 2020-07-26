@@ -121,6 +121,13 @@ Scene* SceneManager::GetScene(SceneID aSceneID)
 	return itr->second;
 }
 
+Scene* SceneManager::GetFirstScene()
+{
+	if (myScenes.empty())
+		return nullptr;
+	return myScenes.begin()->second;
+}
+
 std::vector<SceneID> SceneManager::GetLoadedScenes()
 {
 	std::vector<SceneID> scenes;

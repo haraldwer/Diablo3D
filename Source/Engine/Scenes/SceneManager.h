@@ -15,6 +15,7 @@ public:
 	std::string GetName() override { return "Scene Manager"; }
 	void Editor() override;
 	Scene* GetScene(SceneID aSceneID);
+	Scene* GetFirstScene();
 	std::vector<SceneID> GetLoadedScenes();
 private:
 	SceneID LoadScene(EngineResource* aSceneResource);

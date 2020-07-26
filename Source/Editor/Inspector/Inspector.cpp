@@ -2,19 +2,18 @@
 #include "../Viewport.h"
 #include "../Hierarchy.h"
 #include "../../Engine/ECS/SystemBase.h"
-#include "../../Engine/ECS/Data/SerializableBase.h"
-#include "../../Engine/ECS/Data/Serializable.h"
-#include "EditSerializable.h"
+//#include "EditSerializable.h"
+#include  "../ImGui/misc/cpp/imgui_stdlib.h"
 
 Inspector::Inspector(): mySelectedID("InspectorSelectedID", -1), mySelectedScene("InspectorSelectedSceneID", -1), myEngine(nullptr)
 {
-	mySerializableFunctions[std::type_index(typeid(int))] =									EditInt;
-	mySerializableFunctions[std::type_index(typeid(float))] =								EditFloat;
-	mySerializableFunctions[std::type_index(typeid(std::string))] =							EditString;
-	mySerializableFunctions[std::type_index(typeid(bool))] =								EditBool;
-	mySerializableFunctions[std::type_index(typeid(Vec2F))] =								EditVec2;
-	mySerializableFunctions[std::type_index(typeid(Vec3F))] =								EditVec3;
-	mySerializableFunctions[std::type_index(typeid(CommonUtilities::Vector4<float>))] =		EditVec4;
+	mySerializableFunctions[std::type_index(typeid(int))] =									[&](SerializableBase* base, CommandQueue& queue) { EditInt(base, queue); };
+	mySerializableFunctions[std::type_index(typeid(float))] =								[&](SerializableBase* base, CommandQueue& queue) { EditFloat(base, queue); };
+	mySerializableFunctions[std::type_index(typeid(std::string))] =							[&](SerializableBase* base, CommandQueue& queue) { EditString(base, queue); };
+	mySerializableFunctions[std::type_index(typeid(bool))] =								[&](SerializableBase* base, CommandQueue& queue) { EditBool(base, queue); };
+	mySerializableFunctions[std::type_index(typeid(Vec2F))] =								[&](SerializableBase* base, CommandQueue& queue) { EditVec2(base, queue); };
+	mySerializableFunctions[std::type_index(typeid(Vec3F))] =								[&](SerializableBase* base, CommandQueue& queue) { EditVec3(base, queue); };
+	mySerializableFunctions[std::type_index(typeid(CommonUtilities::Vector4<float>))] =		[&](SerializableBase* base, CommandQueue& queue) { EditVec4(base, queue); };
 	//mySerializableFunctions[std::type_index(typeid(CommonUtilities::Matrix4x4<float>))] =	EditMatrix;
 }
 
@@ -97,7 +96,7 @@ void Inspector::EditComponents(Entity* anEntity)
 			{
 				auto type = it.second->GetType();
 				if (mySerializableFunctions[type])
-					mySerializableFunctions[type](it.second);
+					mySerializableFunctions[type](it.second, myCommandQueue);
 			}
 			ImGui::PopID();
 		}
@@ -200,4 +199,180 @@ void Inspector::Duplicate()
 	// Also transfer component overrides!
 
 	Debug::Log << "Entity duplicated" << std::endl;
+}
+
+void Inspector::EditInt(SerializableBase* base, CommandQueue& queue)
+{
+	ImGui::PushID(base);
+	auto ptr = reinterpret_cast<Serializable<int>*>(base);
+	auto data = ptr->Get();
+	auto name = (ptr->IsOverride() ? "*" : "") + base->GetName();
+
+	static std::unordered_map<EditorControls, std::function<bool()>> funcMap;
+	if (funcMap.empty())
+	{
+		funcMap[EditorControls::NONE] = [] { return false; };
+		funcMap[EditorControls::INPUT_INT] = [&] { return ImGui::InputInt(name.c_str(), &data); };
+		funcMap[EditorControls::DEFAULT] = [&] { return ImGui::DragInt(name.c_str(), &data); };
+	}
+
+	auto itr = funcMap.find(base->GetEditorControls());
+	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
+		Edit(ptr, data, queue);
+	Apply<int>(ptr);
+	ImGui::PopID();
+}
+
+void Inspector::EditFloat(SerializableBase* base, CommandQueue& queue)
+{
+	ImGui::PushID(base);
+	auto ptr = reinterpret_cast<Serializable<float>*>(base);
+	auto data = ptr->Get();
+	auto name = (ptr->IsOverride() ? "*" : "") + base->GetName();
+
+	static std::unordered_map<EditorControls, std::function<bool()>> funcMap;
+	if (funcMap.empty())
+	{
+		funcMap[EditorControls::NONE] = [] { return false; };
+		funcMap[EditorControls::DEFAULT] = [&] { return ImGui::DragFloat(name.c_str(), &data); };
+	}
+
+	auto itr = funcMap.find(base->GetEditorControls());
+	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
+		Edit(ptr, data, queue);
+	Apply<float>(ptr);
+	ImGui::PopID();
+}
+
+void Inspector::EditBool(SerializableBase* base, CommandQueue& queue)
+{
+	ImGui::PushID(base);
+	auto ptr = reinterpret_cast<Serializable<bool>*>(base);
+	auto data = ptr->Get();
+	auto name = (ptr->IsOverride() ? "*" : "") + base->GetName();
+
+	static std::unordered_map<EditorControls, std::function<bool()>> funcMap;
+	if (funcMap.empty())
+	{
+		funcMap[EditorControls::NONE] = [] { return false; };
+		funcMap[EditorControls::DEFAULT] = [&] { return ImGui::Checkbox(name.c_str(), &data); };
+	}
+	auto itr = funcMap.find(base->GetEditorControls());
+	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
+		Edit(ptr, data, queue);
+	Apply<bool>(ptr);
+	ImGui::PopID();
+}
+
+void Inspector::EditString(SerializableBase* base, CommandQueue& queue)
+{
+	ImGui::PushID(base);
+	auto ptr = reinterpret_cast<Serializable<std::string>*>(base);
+	auto data = ptr->Get();
+	auto name = (ptr->IsOverride() ? "*" : "") + base->GetName();
+
+	static std::unordered_map<EditorControls, std::function<bool()>> funcMap;
+	if (funcMap.empty())
+	{
+		funcMap[EditorControls::NONE] = [] { return false; };
+		funcMap[EditorControls::DEFAULT] = [&] { return ImGui::InputText(name.c_str(), &data); };
+	}
+	auto itr = funcMap.find(base->GetEditorControls());
+	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
+		Edit(ptr, data, queue);
+	Apply<std::string>(ptr);
+	ImGui::PopID();
+}
+
+void Inspector::EditVec2(SerializableBase* base, CommandQueue& queue)
+{
+	ImGui::PushID(base);
+	auto ptr = reinterpret_cast<Serializable<Vec2F>*>(base);
+	auto data = ptr->Get();
+	float val[2] = { data.x, data.y };
+	auto name = (ptr->IsOverride() ? "*" : "") + base->GetName();
+	static std::unordered_map<EditorControls, std::function<bool()>> funcMap;
+	if (funcMap.empty())
+	{
+		funcMap[EditorControls::NONE] = [] { return false; };
+		funcMap[EditorControls::DEFAULT] = [&]
+		{
+			if (ImGui::DragFloat2(name.c_str(), val))
+			{
+				data.x = val[0];
+				data.y = val[1];
+				ptr->Set(data);
+				return true;
+			}
+			return false;
+		};
+	}
+	auto itr = funcMap.find(base->GetEditorControls());
+	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
+		Edit(ptr, data, queue);
+	Apply<Vec2F>(ptr);
+	ImGui::PopID();
+}
+
+void Inspector::EditVec3(SerializableBase* base, CommandQueue& queue)
+{
+	ImGui::PushID(base);
+	auto ptr = reinterpret_cast<Serializable<Vec3F>*>(base);
+	auto data = ptr->Get();
+	float val[3] = { data.x, data.y, data.z };
+	auto name = (ptr->IsOverride() ? "*" : "") + base->GetName();
+	static std::unordered_map<EditorControls, std::function<bool()>> funcMap;
+	if (funcMap.empty())
+	{
+		funcMap[EditorControls::NONE] = [] { return false; };
+		funcMap[EditorControls::DEFAULT] = [&]
+		{
+			if (ImGui::DragFloat3(name.c_str(), val))
+			{
+				data.x = val[0];
+				data.y = val[1];
+				data.z = val[2];
+				ptr->Set(data);
+				return true;
+			}
+			return false;
+		};
+	}
+	auto itr = funcMap.find(base->GetEditorControls());
+	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
+		Edit(ptr, data, queue);
+	Apply<Vec3F>(ptr);
+	ImGui::PopID();
+}
+
+void Inspector::EditVec4(SerializableBase* base, CommandQueue& queue)
+{
+	ImGui::PushID(base);
+	auto ptr = reinterpret_cast<Serializable<CommonUtilities::Vector4<float>>*>(base);
+	auto data = ptr->Get();
+	float val[4] = { data.x, data.y, data.z, data.w };
+	auto name = (ptr->IsOverride() ? "*" : "") + base->GetName();
+	static std::unordered_map<EditorControls, std::function<bool()>> funcMap;
+	if (funcMap.empty())
+	{
+		funcMap[EditorControls::NONE] = [] { return false; };
+		funcMap[EditorControls::DEFAULT] = [&]
+		{
+			if (ImGui::DragFloat4(name.c_str(), val))
+			{
+				data.x = val[0];
+				data.y = val[1];
+				data.z = val[2];
+				data.z = val[3];
+				ptr->Set(data);
+				return true;
+			}
+			return false;
+		};
+	}
+	auto itr = funcMap.find(base->GetEditorControls());
+	if (((itr != funcMap.end() && itr->second) ? itr->second : funcMap[EditorControls::DEFAULT])())
+		Edit(ptr, data, queue);
+	Apply<CommonUtilities::Vector4<float>>(ptr);
+	ImGui::PopID();
 }

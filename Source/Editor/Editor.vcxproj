@@ -200,7 +200,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h" />
-    <ClInclude Include="Inspector\EditSerializable.h" />
     <ClInclude Include="Preferences.h" />
     <ClInclude Include="Theme\EditorColorPicker.h" />
     <ClInclude Include="Hierarchy.h" />

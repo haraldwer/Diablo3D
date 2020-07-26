@@ -11,9 +11,11 @@ public:
 	std::string GetName() override { return "Prefab Manager"; }
 	void Editor() override;
 	Prefab* GetPrefab(PrefabID aPrefabID);
+	PrefabID GetPrefabID(const std::string& aName);
 private:
 	void Load();
 	void LoadPrefab(EngineResource* resource);
 	std::unordered_map<PrefabID, Prefab*> myPrefabs;
+	std::unordered_map<std::string, PrefabID> myPrefabNames;
 };
 

@@ -235,6 +235,7 @@
     <ClCompile Include="ECS\ComponentSystems\ModelRenderer.cpp" />
     <ClCompile Include="ECS\CSystemManager.cpp" />
     <ClCompile Include="ECS\Data\SerializableBase.cpp" />
+    <ClCompile Include="ECS\SystemBase.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EngineResources\EngineResource.cpp" />
     <ClCompile Include="ECS\Data\EntityData.cpp" />

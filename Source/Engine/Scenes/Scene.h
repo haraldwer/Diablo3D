@@ -24,7 +24,7 @@ class Scene
 {
 public:
 	Scene(SceneID anID, const std::string& aPath);
-	Entity* CreateEntity(PrefabID aPrefabID);
+	Entity* CreateEntity(PrefabID aPrefabID = -1);
 	Entity* GetEntity(EntityID anID);
 	bool DestroyEntity(EntityID anID);
 	std::string GetPath() const;
