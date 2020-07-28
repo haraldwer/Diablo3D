@@ -85,7 +85,7 @@ void Inspector::Apply(Serializable<T>* ptr)
 {
 	if (!ptr->IsOverride())
 		return;
-	if (!ImGui::BeginPopupContextItem())
+	if (!ImGui::BeginPopupContextItem("Submenu"))
 		return;
 	if (ImGui::MenuItem("Apply"))
 		ptr->Apply();

@@ -1,5 +1,6 @@
 #include "Theme.h"
 #include "EditorColorPicker.h"
+#include "../../CommonUtilities/Timer.h"
 
 Theme::Theme():
 	bg("ThemeBG", { 200.0f / 255.0f, 200.0f / 255.0f, 200.0f / 255.0f, 1 }),
@@ -8,7 +9,8 @@ Theme::Theme():
 	high("ThemeHigh", 1.0f),
 	mid("ThemeMid", 0.75f),
 	low("ThemeLow", 1.0f),
-	offset("ThemeOffset", 1.0f)
+	offset("ThemeOffset", 1.0f),
+	disco(false)
 {
 }
 
@@ -24,12 +26,22 @@ void Theme::Update()
 		Light();
 	if (ImGui::Button("Dark", ImVec2(-1, 0)))
 		Dark();
+	if (ImGui::Button("Disco", ImVec2(-1, 0)))
+	{
+		disco = !disco;
+		if (!disco)
+			Load();
+	}
+	if (disco)
+		Disco();
+	Save();	
 	EditorColorPicker::Apply();
-	Save();
 }
 
 void Theme::Save()
 {
+	if (disco)
+		return;
 	bg.Set({ EditorColorPicker::bg.x, EditorColorPicker::bg.y, EditorColorPicker::bg.z, EditorColorPicker::bg.w });
 	text.Set({ EditorColorPicker::text.x, EditorColorPicker::text.y, EditorColorPicker::text.z, EditorColorPicker::text.w });
 	base.Set({ EditorColorPicker::base.x, EditorColorPicker::base.y, EditorColorPicker::base.z, EditorColorPicker::base.w });
@@ -73,4 +85,17 @@ void Theme::Dark()
 	EditorColorPicker::mid_val = 0.25f;
 	EditorColorPicker::low_val = 0.15f;
 	EditorColorPicker::window_offset = -0.4f;
+}
+
+void Theme::Disco()
+{
+	static CommonUtilities::Timer timer;
+	const float tot = timer.GetTotalTime();
+	EditorColorPicker::base = ImVec4(sin(tot * 1), sin(tot * 2), sin(tot * 3), 1);
+	EditorColorPicker::bg = ImVec4(sin(tot * 3), sin(tot * 2), sin(tot * 1), 1);
+	EditorColorPicker::text = ImVec4(sin(tot * 2), sin(tot * 1), sin(tot * 3), 1);
+	EditorColorPicker::high_val = sin((tot + 10) * 1.3) * 0.4f;
+	EditorColorPicker::mid_val = sin((tot + 10) * 1.8) * 0.4f;
+	EditorColorPicker::low_val = sin((tot + 10) * 2.3) * 0.4f;
+	EditorColorPicker::window_offset = sin((tot + 10) * 2.3) * 0.4f;
 }

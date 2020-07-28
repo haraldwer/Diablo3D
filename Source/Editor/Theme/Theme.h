@@ -1,6 +1,8 @@
 #pragma once
 #include "../Preferences.h"
 
+typedef bool disco;
+
 class Theme
 {
 public:
@@ -12,7 +14,8 @@ private:
 	void Load();
 	void Light();
 	void Dark();
-
+	void Disco();
+	
 	Preference<CommonUtilities::Vector4<float>> bg;
 	Preference<CommonUtilities::Vector4<float>> text;
 	Preference<CommonUtilities::Vector4<float>> base;
@@ -20,5 +23,6 @@ private:
 	Preference<float> mid;
 	Preference<float> low;
 	Preference<float> offset;
+	disco disco;
 };
 

@@ -13,6 +13,7 @@ public:
 	void Deserialize(const rapidjson::Value::Object& aContainer);
 	template <class T>
 	Stored<T>* GetStored(const std::string& aStoredName);
+	std::unordered_map<std::string, StoredBase*>& GetAllStored();
 	void Clear();
 	
 private:

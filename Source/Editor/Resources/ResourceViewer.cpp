@@ -14,10 +14,10 @@ bool ResourceViewer::WindowUpdate(Engine* anEngine)
 	if (!myIsOpen)
 		return false;
 	
-	if(ImGui::Begin((myResourceType._to_string() + std::string(" Resource Editor")).c_str(), &myIsOpen))
+	EngineResource* resource = anEngine->GetServiceLocator().GetService<ResourceManager>().GetResource(myResourceID);
+	if(resource)
 	{
-		EngineResource* resource = anEngine->GetServiceLocator().GetService<ResourceManager>().GetResource(myResourceID);
-		if(resource)
+		if (ImGui::Begin(resource->myName.c_str(), &myIsOpen))
 		{
 			ImGui::Text(("ID: " + std::to_string(resource->myID)).c_str());
 			ImGui::Text(("Name: " + resource->myName).c_str());
@@ -25,12 +25,15 @@ bool ResourceViewer::WindowUpdate(Engine* anEngine)
 			ImGui::Text(("Path: " + resource->myPath).c_str());
 			Update(resource, anEngine);
 		}
-		else
-		{
-			ImGui::Text(("Unable to load resource with id " + std::to_string(myResourceID)).c_str());
-		}
+		ImGui::End();
 	}
-	ImGui::End();
+	else
+	{
+		if (ImGui::Begin((myResourceType._to_string() + std::string(" Resource Editor")).c_str(), &myIsOpen))
+			ImGui::Text(("Unable to load resource with id " + std::to_string(myResourceID)).c_str());
+		ImGui::End();
+	}
+	
 	return myIsOpen;
 }
 

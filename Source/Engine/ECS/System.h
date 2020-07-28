@@ -9,6 +9,7 @@ public:
 	virtual ~System() = default;
 	Container<EntityData>& GetContainer(); // Because of inheritance
 	std::unordered_map<std::string, SerializableBase*>& GetEntityProperties(EntityID anID) override;
+	std::unordered_map<std::string, StoredBase*>& GetPrefabProperties(PrefabID anID) override;
 	SerializableBase* GetEntityProperty(EntityID anID, const std::string& aPropertyName) override;
 	
 private:
@@ -36,6 +37,13 @@ std::unordered_map<std::string, SerializableBase*>& System<CS, EntityData>::GetE
 {
 	auto& data = myContainer.GetData(anID);
 	return data.GetSerializable();
+}
+
+template <class CS, class EntityData>
+std::unordered_map<std::string, StoredBase*>& System<CS, EntityData>::GetPrefabProperties(PrefabID anID)
+{
+	auto& data = myContainer.GetPrefab(anID);
+	return data.GetAllStored();
 }
 
 template <class CS, class EntityData>

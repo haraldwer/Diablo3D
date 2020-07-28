@@ -192,6 +192,7 @@
     <ClCompile Include="Inspector\Inspector.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Resources\PrefabViewer.cpp" />
     <ClCompile Include="Preferences.cpp" />
     <ClCompile Include="Resources\ResourceBrowser.cpp" />
     <ClCompile Include="Resources\ResourceViewer.cpp" />
@@ -200,6 +201,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h" />
+    <ClInclude Include="Resources\PrefabViewer.h" />
     <ClInclude Include="Preferences.h" />
     <ClInclude Include="Theme\EditorColorPicker.h" />
     <ClInclude Include="Hierarchy.h" />

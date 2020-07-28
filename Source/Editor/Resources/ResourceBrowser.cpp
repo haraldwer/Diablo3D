@@ -2,7 +2,7 @@
 #include "../Engine/Engine.h"
 #include "../ImGui/imgui.h"
 #include "ResourceViewer.h"
-
+#include "PrefabViewer.h"
 
 ResourceBrowser::ResourceBrowser(): myManager(nullptr)
 {
@@ -133,18 +133,16 @@ ResourceViewer* ResourceBrowser::CreateResourceViewer(EngineResource* aResource)
 	ResourceViewer* viewer = nullptr;
 	switch(aResource->myType)
 	{
-	case ResourceType::MODEL:
-		break;
-	case ResourceType::TEXTURE:
-		break;
 	case ResourceType::PREFAB:
+		viewer = new PrefabViewer(aResource->myType, aResource->myID);
 		break;
+	case ResourceType::MODEL:
+	case ResourceType::TEXTURE:
 	case ResourceType::SCENE:
-		break;
 	default:
-		return nullptr;
+		viewer = new ResourceViewer(aResource->myType, aResource->myID);
+		break;
 	}
-	viewer = new ResourceViewer(aResource->myType, aResource->myID);
 	return viewer;
 }
 

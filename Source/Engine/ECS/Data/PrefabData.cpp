@@ -167,6 +167,11 @@ void PrefabData::Deserialize(const rapidjson::Value::Object& aContainer)
 	}
 }
 
+std::unordered_map<std::string, StoredBase*>& PrefabData::GetAllStored()
+{
+	return myStoredMap;
+}
+
 void PrefabData::Clear()
 {
 	for (auto& it : myStoredMap)

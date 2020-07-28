@@ -9,6 +9,7 @@
 class Transform;
 class Entity;
 class SerializableBase;
+class StoredBase;
 
 class SystemBase
 {
@@ -23,6 +24,7 @@ public:
 	static T* GetSystem();
 	virtual std::string GetName() = 0;
 	virtual std::unordered_map<std::string, SerializableBase*>& GetEntityProperties(EntityID anID) = 0;
+	virtual std::unordered_map<std::string, StoredBase*>& GetPrefabProperties(PrefabID anID) = 0;
 	virtual SerializableBase* GetEntityProperty(EntityID anID, const std::string& aPopertyName) = 0;
 	
 private:
