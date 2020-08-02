@@ -3,6 +3,8 @@
 #include "Stored.h"
 #include "PrefabData.h"
 
+#define SERIALIZABLE(var) var(#var)
+
 template <class T>
 class Serializable : public SerializableBase
 {

@@ -6,6 +6,8 @@
 #include "Engine/EngineResources/ResourceManager.h"
 #include "RapidJSON/document.h"
 #include "ImGui/imgui.h"
+#include <fstream>
+#include "../RapidJSON/formatter.h"
 
 void PrefabManager::Init()
 {
@@ -49,6 +51,59 @@ PrefabID PrefabManager::GetPrefabID(const std::string& aName)
 		return -1;
 	}
 	return find->second;
+}
+
+void PrefabManager::Save()
+{
+	auto& resourceManager = ServiceLocator::Instance().GetService<ResourceManager>();
+	auto& sysMan = ServiceLocator::Instance().GetService<CSystemManager>();
+	for(auto& it : myPrefabs)
+	{
+		if(!it.second)
+			continue;
+
+		auto resource = resourceManager.GetResource(it.first);
+		if(!resource)
+		{
+			Debug::Error << "Unable to save prefab, unable to find resource with ID " << it.first << std::endl;
+			continue;
+		}
+		
+		rapidjson::StringBuffer s;
+		rapidjson::Writer<rapidjson::StringBuffer> writer(s);
+		writer.StartObject();
+		if (!resourceManager.SaveResource(it.first, writer))
+			continue;
+		
+		writer.Key("Components");
+		writer.StartArray();
+		auto comps = it.second->GetComponents();
+		for(auto& comp : comps)
+		{
+			auto sys = sysMan.GetSystem(comp);
+			if (!sys)
+			{
+				Debug::Error << "Unable to find CSystem " << comp << " when trying to save prefab " << it.second->GetName() << std::endl;
+				continue;
+			}
+			writer.StartObject();
+			writer.Key("System");
+			writer.String(comp.c_str());
+			auto& data = sys->GetPrefabData(it.first);
+			data.Serialize(writer);
+			writer.EndObject();
+		}
+		writer.EndArray();
+		writer.EndObject();
+		const std::string formatted = Format(s.GetString());
+		std::ofstream out(resource->myPath);
+		out.clear();
+		out << formatted;
+		out.close();
+		if (resource)
+			resource->myDoc = formatted;
+		Debug::Log << "Prefab " << resource->myName << " saved" << std::endl;
+	}
 }
 
 void PrefabManager::Load()

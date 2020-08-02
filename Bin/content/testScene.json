@@ -24,6 +24,9 @@
 		"Overrides":{
 			"Model Renderer":{
 				
+			},
+			"Rigidbody":{
+				
 			}
 		}
 	},

@@ -135,3 +135,9 @@ std::vector<SceneID> SceneManager::GetLoadedScenes()
 		scenes.push_back(it.first);
 	return scenes;
 }
+
+void SceneManager::SaveScenes()
+{
+	for (auto& it : myScenes)
+		it.second->Save();
+}

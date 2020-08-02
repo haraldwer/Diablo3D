@@ -6,7 +6,7 @@ class CSystems
 {
 	// Put every system here
 	
-	// Engine components
+	// Engine systems
 	ModelRenderer myModelRenderer;
 	Rigidbody myRigidbody;
 };

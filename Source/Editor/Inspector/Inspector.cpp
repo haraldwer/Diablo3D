@@ -3,7 +3,8 @@
 #include "../Hierarchy.h"
 #include "../../Engine/ECS/SystemBase.h"
 //#include "EditSerializable.h"
-#include  "../ImGui/misc/cpp/imgui_stdlib.h"
+#include "../ImGui/misc/cpp/imgui_stdlib.h"
+#include "../Engine/Utility/ImGUIUtility.h"
 
 #define SERIALIZABLE_FUNC(type, func) mySerializableFunctions[std::type_index(typeid(type))] = [&](SerializableBase* base, CommandQueue& queue, const std::string& aSystemName) { func(base, queue, aSystemName); };
 
@@ -99,7 +100,24 @@ void Inspector::EditComponents(Entity* anEntity)
 				if (mySerializableFunctions[type])
 					mySerializableFunctions[type](it.second, myCommandQueue, sys->GetName());
 			}
+			sys->EditEntity(anEntity->GetID());
 			ImGui::PopID();
+		}
+	}
+
+	ImGui::Separator();
+
+	static int curr = 0;
+	auto systems = sysMan.GetSystems();
+	ImGui::Combo("##SysList", &curr, systems);
+	ImGui::SameLine();
+	if(ImGui::Button("Add"))
+	{
+		auto sys = sysMan.GetSystem(systems[curr]);
+		if(sys)
+		{
+			sys->AddEntity(anEntity);
+			anEntity->AddSystem(sys->GetTypeIndex());
 		}
 	}
 }
@@ -165,13 +183,17 @@ void Inspector::Save()
 {
 	ServiceLocator& serviceLocator = myEngine->GetServiceLocator();
 	SceneManager& sceneManager = serviceLocator.GetService<SceneManager>();
-	Scene* scene = sceneManager.GetScene(mySelectedScene.Get());
-	if (!scene)
-	{
-		Debug::Error << "Unable to save scene, scene ptr was null" << std::endl;
-		return;
-	}
-	scene->Save();
+	sceneManager.SaveScenes();
+	PrefabManager& prefabManager = serviceLocator.GetService<PrefabManager>();
+	prefabManager.Save();
+	
+	//Scene* scene = sceneManager.GetScene(mySelectedScene.Get());
+	//if (!scene)
+	//{
+	//	Debug::Error << "Unable to save scene, scene ptr was null" << std::endl;
+	//	return;
+	//}
+	//scene->Save();
 }
 
 void Inspector::Duplicate()

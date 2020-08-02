@@ -2,6 +2,7 @@
 #include "../../../D3DX11/D3DModel.h"
 #include "../../EngineResources/EngineResource.h"
 #include "Engine/EngineResources/ResourceManager.h"
+#include "ImGui/imgui.h"
 
 void ModelRenderer::Init()
 {
@@ -54,4 +55,9 @@ void ModelRenderer::Update()
 		}
 		return true;
 	});
+}
+
+void ModelRenderer::EditorUpdate()
+{
+	Update();
 }

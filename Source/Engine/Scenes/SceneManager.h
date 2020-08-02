@@ -17,6 +17,7 @@ public:
 	Scene* GetScene(SceneID aSceneID);
 	Scene* GetFirstScene();
 	std::vector<SceneID> GetLoadedScenes();
+	void SaveScenes();
 private:
 	SceneID LoadScene(EngineResource* aSceneResource);
 	std::unordered_map<SceneID, Scene*> myScenes;

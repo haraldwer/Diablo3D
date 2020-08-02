@@ -7,6 +7,7 @@
 class Entity
 {
 	friend class Scene;
+	friend class Inspector;
 public:
 	EntityID GetID() const;
 	SceneID GetSceneID() const;
@@ -21,8 +22,6 @@ public:
 	// Will enable / disable this instance completely
 	void SetEnabled(bool aEnabled);
 	bool GetEnabled() const;
-
-	// Recovery is used in the editor for Ctrl + Z, Ctrl + Y
 	bool Destroy();
 
 	// List of systems where this entity has component data

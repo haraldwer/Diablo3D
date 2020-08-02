@@ -1,6 +1,8 @@
 #pragma once
 #include "SystemBase.h"
 #include "Data/Container.h"
+#include "Data/Serializable.h"
+#include "Data/EntityData.h"
 
 template <class CS, class EntityData>
 class System : public SystemBase
@@ -11,12 +13,29 @@ public:
 	std::unordered_map<std::string, SerializableBase*>& GetEntityProperties(EntityID anID) override;
 	std::unordered_map<std::string, StoredBase*>& GetPrefabProperties(PrefabID anID) override;
 	SerializableBase* GetEntityProperty(EntityID anID, const std::string& aPropertyName) override;
+	PrefabData& GetPrefabData(PrefabID aPrefabID) override;
 	
 private:
+	
+	// GetName, Init and Update are Pure Virtual and has to be defined in each system
+	// Init() override;
+	// Update() override;
+	virtual std::string GetName() override = 0;
+
+	// This function is called if the game isn't running but the editor is open
+	virtual void EditorUpdate() override {}
+	
+	// Override these functions to write your own Editor UI using ImGui
+	virtual void EditSystem() override {}
+	virtual void EditPrefab(const PrefabID anID) override {}
+	virtual void EditEntity(const EntityID anID) override {}
+	
+	// Override these if you want to change the behaviour when adding, or removing
 	virtual void AddEntity(Entity* anEntity) override;
 	virtual void RemoveEntity(EntityID anEntityID) override;
 	virtual void SetEntityEnabled(const EntityID anEntityID, bool aEnabled) override;
-	
+
+	// These should not be overriden
 	void ApplyEntityOverrides(EntityID anEntityID, const rapidjson::GenericObject<false, rapidjson::Value>& aBase) override;
 	void GetEntityOverrides(EntityID anEntityID, rapidjson::Writer<rapidjson::StringBuffer>& aBase) override;
 	void LoadPrefab(PrefabID aPrefabID, const rapidjson::GenericObject<false, rapidjson::Value>& aBase) override;
@@ -55,6 +74,12 @@ SerializableBase* System<CS, EntityData>::GetEntityProperty(EntityID anID, const
 	if (ptr == serializable.end())
 		return nullptr;
 	return ptr->second;
+}
+
+template <class CS, class EntityData>
+PrefabData& System<CS, EntityData>::GetPrefabData(PrefabID aPrefabID)
+{
+	return myContainer.GetPrefab(aPrefabID);
 }
 
 template <class CS, class EntityData>

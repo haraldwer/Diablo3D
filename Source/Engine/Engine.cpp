@@ -21,7 +21,7 @@ void Engine::Shutdown()
 
 void Engine::Update(bool run)
 {
-	myComponentManager.Update();
+	myComponentManager.Update(run);
 	myPhysicsManager.Update();
 }
 

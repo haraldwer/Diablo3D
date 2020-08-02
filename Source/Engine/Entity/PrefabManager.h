@@ -12,6 +12,7 @@ public:
 	void Editor() override;
 	Prefab* GetPrefab(PrefabID aPrefabID);
 	PrefabID GetPrefabID(const std::string& aName);
+	void Save();
 private:
 	void Load();
 	void LoadPrefab(EngineResource* resource);

@@ -238,7 +238,7 @@ void ResourceManager::ImportResource(const std::string& aPath)
 		type = ResourceType::MODEL;
 	
 	auto resource = new EngineResource();
-	resource->myName = GetNameFromPath(aPath);
+	resource->myName = ClipExt(GetNameFromPath(aPath));
 	resource->myID =  CreateResourceID(resource->myName);
 	resource->myExt = GetExt(aPath);
 	resource->myPath = aPath;

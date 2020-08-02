@@ -20,6 +20,7 @@ public:
 	Data& Insert(Entity& anEntity);
 	void InsertPrefab(const PrefabID anID, const PrefabData& someData);
 	void Remove(const EntityID anID);
+	bool HasData(const EntityID anID);
 	Data& GetData(const EntityID anID);
 	PrefabData& GetPrefab(const PrefabID anID);
 	bool SetEnabled(const EntityID anID, const bool aEnabled);
@@ -45,7 +46,10 @@ private:
 template <class Data>
 bool Container<Data>::Perform(EntityID anEntityID, std::function<bool(const EntityID anID, Data& someData)> aFunction)
 {
-	return aFunction(anEntityID, myData[anEntityID].data); 
+	auto find = myData.find(anEntityID);
+	if (find == myData.end())
+		return false;
+	return aFunction(anEntityID, find->second.data); 
 }
 
 template <class Data>
@@ -134,6 +138,12 @@ void Container<Data>::Remove(const EntityID anID)
 	auto itr = myData.find(anID);
 	if (itr != myData.end())
 		myData.erase(anID);
+}
+
+template <class Data>
+bool Container<Data>::HasData(const EntityID anID)
+{
+	return myData.find(anID) != myData.end();
 }
 
 template <class Data>

@@ -16,7 +16,7 @@ public:
 	CSystemManager();
 	~CSystemManager();
 	void Init();
-	void Update();
+	void Update(bool run);
 	SystemBase* GetSystem(const std::string& aSystemName);
 	SystemBase* GetSystem(const std::type_index& aSystemTypeIndex);
 	template <class T>
@@ -25,6 +25,7 @@ public:
 	void Editor() override;
 	void RemoveEntity(const EntityID anEntityID, const std::vector<std::type_index>& someSystemTypes);
 	void SetEntityEnabled(const EntityID anEntityID, const std::vector<std::type_index>& someSystemTypes, bool aEnabled);
+	std::vector<std::string> GetSystems();
 private:
 	static std::vector<SystemBase*> mySystems;
 	static CSystemManager* instance;

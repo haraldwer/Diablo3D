@@ -31,4 +31,5 @@ public:
 	std::string GetName() override { return "Model Renderer"; }
 	void Init() override;
 	void Update() override;
+	void EditorUpdate() override;
 };

@@ -36,6 +36,7 @@ void PrefabViewer::Update(EngineResource* aResource, Engine* anEngine)
 				ImGui::Text(prop.first.c_str());
 			}
 		}
+		sys->EditPrefab(aResource->myID);
 		ImGui::PopID();
 	}
 }

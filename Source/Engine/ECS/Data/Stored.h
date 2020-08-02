@@ -9,6 +9,7 @@ public:
 	T Get();
 	void* GetData() override;
 	std::type_index GetHash() override;
+	void Serialize(rapidjson::Writer<rapidjson::StringBuffer>& aBase) override;
 private:
 	T myData; 
 };
@@ -35,4 +36,10 @@ template <class T>
 std::type_index Stored<T>::GetHash()
 {
 	return std::type_index(typeid(T));
+}
+
+template <class T>
+void Stored<T>::Serialize(rapidjson::Writer<rapidjson::StringBuffer>& aBase)
+{
+	Serialize::Serialize("Value", myData, aBase);
 }

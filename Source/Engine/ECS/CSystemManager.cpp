@@ -39,10 +39,10 @@ void CSystemManager::Init()
 		it->Init();
 }
 
-void CSystemManager::Update()
+void CSystemManager::Update(const bool run)
 {
 	for (auto& it : mySystems)
-		it->Update();
+		run ? it->Update() : it->EditorUpdate();
 }
 
 SystemBase* CSystemManager::GetSystem(const std::string& aSystemName)
@@ -97,4 +97,12 @@ void CSystemManager::SetEntityEnabled(const EntityID anEntityID, const std::vect
 		if (sys)
 			sys->SetEntityEnabled(anEntityID, aEnabled);
 	}
+}
+
+std::vector<std::string> CSystemManager::GetSystems()
+{
+	std::vector<std::string> systems;
+	for (auto& it : mySystemMap)
+		systems.push_back(it.first);
+	return systems;
 }

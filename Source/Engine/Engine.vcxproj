@@ -194,8 +194,10 @@
     <ClInclude Include="ECS\Data\EntityData.h" />
     <ClInclude Include="Entity\Entity.h" />
     <ClInclude Include="Entity\Prefab.h" />
+    <ClInclude Include="ECS\ComponentSystems\ExampleSystem.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="ECS\Data\PrefabData.h" />
+    <ClInclude Include="Utility\ImGUIUtility.h" />
     <ClInclude Include="ResouceIDs.h" />
     <ClInclude Include="ECS\Data\Serializable.h" />
     <ClInclude Include="ECS\Data\Stored.h" />
@@ -243,6 +245,8 @@
     <ClCompile Include="Entity\Prefab.cpp" />
     <ClCompile Include="ECS\Data\PrefabData.cpp" />
     <ClCompile Include="ECS\ComponentSystems\Rigidbody.cpp" />
+    <ClCompile Include="ECS\ComponentSystems\ExampleSystem.cpp" />
+    <ClCompile Include="Utility\ImGUIUtility.cpp" />
     <ClCompile Include="Utility\Input.cpp" />
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="EngineResources\ResourceManager.cpp" />
