@@ -85,17 +85,18 @@ physx::PxRigidStatic* PhysicsManager::CreateStatic(const physx::PxTransform& t, 
 	return rb;
 }
 
-void PhysicsManager::DestroyRigidbody(physx::PxActor* rb, SceneID scene)
+void PhysicsManager::DestroyActor(physx::PxActor* rb, SceneID scene)
 {
 	if (!rb)
 		return;
-	if (!myScenes[scene])
+	auto find = myScenes.find(scene);
+	if(find == myScenes.end())
 	{
 		Debug::Error << "Cannot remove dynamic from scene which does not exist. SceneID: " << scene << std::endl;
 	}
 	else
 	{
-		myScenes[scene]->removeActor(*rb);
+		find->second->removeActor(*rb);
 	}
 	rb->release();
 }

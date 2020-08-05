@@ -1,6 +1,7 @@
 #pragma once
 #include "../CommonUtilities/Vector3.h"
 #include "../CommonUtilities/Matrix4x4.h"
+#include <PhysX/foundation/PxTransform.h>
 
 typedef CommonUtilities::Vector3<float> Vec3F;
 typedef CommonUtilities::Matrix4x4<float> Mat4f;
@@ -28,8 +29,10 @@ public:
 	Mat4f GetMatrix() const;
 	// Input param needs to be float[16], representing a 4x4 matrix. 
 	void GetMatrix(float* aMatrix);
-	
+	physx::PxTransform& GetPhysXRef();
+
 private:
 	CommonUtilities::Matrix4x4<float> myMatrix;
+	physx::PxTransform myTransform;
 };
 

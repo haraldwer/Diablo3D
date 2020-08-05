@@ -1,10 +1,10 @@
 {
 	"ThemeHigh":0.3499999940395355,
-	"InspectorSelectedID":-1,
+	"InspectorSelectedID":2,
 	"ThemeLow":0.15000000596046449,
 	"ThemeMid":0.25,
 	"HierarchyOpen":true,
-	"InspectorSelectedSceneID":-1,
+	"InspectorSelectedSceneID":3,
 	"ThemeBG":{
 		"x":0.19607843458652497,
 		"y":0.19607843458652497,
@@ -26,13 +26,13 @@
 	},
 	"ThemeOffset":-0.4000000059604645,
 	"CameraPos":{
-		"x":-3.5991313457489015,
-		"y":1.6773052215576172,
-		"z":-5.403555870056152
+		"x":-1.6819138526916505,
+		"y":3.6954545974731447,
+		"z":-6.575267791748047
 	},
 	"CameraDir":{
-		"x":19.99995994567871,
-		"y":371.6018371582031,
+		"x":18.799959182739259,
+		"y":362.6015625,
 		"z":0.0
 	},
 	"InputOpen":false,

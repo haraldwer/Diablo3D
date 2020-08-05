@@ -122,3 +122,8 @@ void Transform::GetMatrix(float* aMatrix)
 		}
 	}
 }
+
+physx::PxTransform& Transform::GetPhysXRef()
+{
+	return myTransform;
+}

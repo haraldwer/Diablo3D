@@ -182,6 +182,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ECS\ComponentSystems\Collider.h" />
     <ClInclude Include="ECS\Data\SerializableBase.h" />
     <ClInclude Include="ECS\SystemBase.h" />
     <ClInclude Include="ECS\Data\Container.h" />
@@ -233,6 +234,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ECS\ComponentSystems\Collider.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="ECS\ComponentSystems\ModelRenderer.cpp" />
     <ClCompile Include="ECS\CSystemManager.cpp" />

@@ -111,6 +111,9 @@
     <ClInclude Include="ECS\ComponentSystems\ExampleSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ECS\ComponentSystems\Collider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Engine.rc">
@@ -185,6 +188,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ECS\ComponentSystems\ExampleSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ECS\ComponentSystems\Collider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

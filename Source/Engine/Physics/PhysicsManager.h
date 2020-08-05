@@ -17,12 +17,12 @@ public:
 	void							CreateScene(SceneID aSceneID);
 	void							DestroyScene(SceneID aSceneID);
 	
-private:
 	physx::PxRigidDynamic*			CreateDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, SceneID scene);
 	physx::PxRigidStatic*			CreateStatic(const physx::PxTransform& t, const physx::PxGeometry& geometry, SceneID scene);
-
-	void DestroyRigidbody(physx::PxActor* rb, SceneID scene);
 	
+	void DestroyActor(physx::PxActor* rb, SceneID scene);
+	
+private:
 	physx::PxDefaultAllocator		myAllocator;
 	physx::PxDefaultErrorCallback	myErrorCallback;
 	physx::PxFoundation*			myFoundation;

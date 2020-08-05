@@ -1,7 +1,7 @@
 {
-	"Name":"testPrefab",
+	"Name":"physicsTest",
 	"Type":"PREFAB",
-	"ID":0,
+	"ID":1,
 	"Ext":"json",
 	"Components":[{
 		"System":"Model Renderer",
@@ -17,7 +17,7 @@
 		}]
 	},
 	{
-		"System":"Collider",
+		"System":"Rigidbody",
 		"Properties":[]
 	}]
 }
