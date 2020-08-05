@@ -1,10 +1,10 @@
 {
 	"ThemeHigh":0.3499999940395355,
-	"InspectorSelectedID":1,
+	"InspectorSelectedID":-1,
 	"ThemeLow":0.15000000596046449,
 	"ThemeMid":0.25,
 	"HierarchyOpen":true,
-	"InspectorSelectedSceneID":3,
+	"InspectorSelectedSceneID":-1,
 	"ThemeBG":{
 		"x":0.19607843458652497,
 		"y":0.19607843458652497,
@@ -31,8 +31,8 @@
 		"z":-5.403555870056152
 	},
 	"CameraDir":{
-		"x":13.399948120117188,
-		"y":375.40191650390627,
+		"x":19.99995994567871,
+		"y":371.6018371582031,
 		"z":0.0
 	},
 	"InputOpen":false,

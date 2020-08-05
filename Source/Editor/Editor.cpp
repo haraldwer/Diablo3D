@@ -59,6 +59,15 @@ void Editor::Update()
 	}
 	
 	ImGui::BeginMainMenuBar();
+	if(ImGui::BeginMenu("File"))
+	{
+		if (ImGui::MenuItem("Save scenes"))
+			myEngine->GetServiceLocator().GetService<SceneManager>().SaveScenes();
+		if(ImGui::MenuItem("Save prefabs"))
+			myEngine->GetServiceLocator().GetService<PrefabManager>().Save();
+		ImGui::EndMenu();
+	}
+	
 	if(ImGui::BeginMenu("View"))
 	{
 		for(auto& it : myWindows)

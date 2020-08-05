@@ -6,7 +6,7 @@
 
 class ResourceManager : public Service<ResourceManager>
 {
-private:
+public:
 	inline static std::string GetNameFromPath(const std::string& aPath)
 	{
 		for (int i = aPath.size() - 1; i >= 0; i--)
@@ -24,7 +24,6 @@ private:
 	}
 
 	
-public:
 	struct UnloadedResource
 	{
 		UnloadedResource(const std::string& aPath) : path(aPath)

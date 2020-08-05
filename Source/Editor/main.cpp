@@ -14,6 +14,7 @@
 #include "Editor.h"
 #include "../CommonUtilities/Log.h"
 #include "../D3DX11/D3DSystem.h"
+#include "DropManager.h"
 
 // Data
 static ID3D11Device* g_pd3dDevice = NULL;
@@ -33,6 +34,8 @@ Editor* editor = nullptr;
 // Main code
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline, int iCmdshow)
 {
+    OleInitialize(NULL);
+	
     ImGui_ImplWin32_EnableDpiAwareness();
 
     // Create application window
@@ -40,6 +43,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
     ::RegisterClassEx(&wc);
     HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("Diablo3D Editor"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
 
+    DropManager dm;
+    RegisterDragDrop(hwnd, &dm);
+	
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
     {
@@ -144,6 +150,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
     	
         ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
         editor->Update();
+        dm.Update();
     	
         // Rendering
         ImGui::Render();
@@ -163,6 +170,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
     }
 
     editor->Shutdown();
+
+    RevokeDragDrop(hwnd);
 	
     // Cleanup
     ImGui_ImplDX11_Shutdown();
@@ -173,6 +182,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
     ::DestroyWindow(hwnd);
     ::UnregisterClass(wc.lpszClassName, wc.hInstance);
 
+    OleUninitialize();
+	
     return 0;
 }
 

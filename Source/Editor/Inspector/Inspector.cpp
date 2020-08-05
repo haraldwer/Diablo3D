@@ -137,6 +137,8 @@ void Inspector::Update(Gizmo& aGizmo, Engine* anEngine)
 	}
 	else
 	{
+		EditName(entity);
+		
 		if (aGizmo.Manipulate(entity->GetTransform()))
 		{
 			if(!myIsManipulating)
@@ -173,6 +175,68 @@ void Inspector::Update(Gizmo& aGizmo, Engine* anEngine)
 	}
 }
 
+void Inspector::EditName(Entity* anEntity)
+{
+	if (!anEntity)
+		return;
+
+	std::string name = anEntity->GetName();
+	std::string prefabName = "";
+	if(anEntity->GetPrefabID() != -1)
+	{
+		ServiceLocator& serviceLocator = myEngine->GetServiceLocator();
+		PrefabManager& prefabManager = serviceLocator.GetService<PrefabManager>();
+		auto prefab = prefabManager.GetPrefab(anEntity->GetPrefabID());
+		if (prefab)
+			prefabName = prefab->GetName();
+		if (name == "")
+			name = prefabName;
+	}
+	
+	if (ImGui::InputText("Name", &name))
+	{
+		anEntity->SetName(name == prefabName ? "" : name);
+		auto c = new Command();
+		c->entityID = mySelectedID.Get();
+		c->sceneID = mySelectedScene.Get();
+		c->data.SetValue<std::string>(0, name);
+		c->revert = [&](Command& aCommand)
+		{
+			// Recover
+			if (!myEngine)
+				return;
+			if (aCommand.sceneID == -1)
+				return;
+			if (aCommand.entityID == -1)
+				return;
+			ServiceLocator& serviceLocator = myEngine->GetServiceLocator();
+			SceneManager& sceneManager = serviceLocator.GetService<SceneManager>();
+			Scene* scene = sceneManager.GetScene(aCommand.sceneID);
+			if (!scene)
+				return;
+			if (!scene->ShowEntity(aCommand.entityID))
+				return;
+			Entity* entity = GetEntity(aCommand.sceneID, aCommand.entityID);
+			if (!entity)
+				return;
+			std::string tempName = entity->GetName();
+			entity->SetName(aCommand.data.GetValue<std::string>(0));
+			aCommand.data.SetValue<std::string>(0, tempName);
+		};
+		c->redo = c->revert;
+		myCommandQueue.Add(c);
+	}
+	
+	if (ImGui::BeginPopupContextItem("Submenu"))
+	{
+		if (ImGui::MenuItem("Apply to prefab"))
+		{
+			// Apply name to prefab!
+		}
+		ImGui::EndPopup();
+	}
+}
+
 void Inspector::SetEntity(const SceneID aScene, const EntityID aEntity)
 {
 	mySelectedID.Set(aEntity);
@@ -186,14 +250,6 @@ void Inspector::Save()
 	sceneManager.SaveScenes();
 	PrefabManager& prefabManager = serviceLocator.GetService<PrefabManager>();
 	prefabManager.Save();
-	
-	//Scene* scene = sceneManager.GetScene(mySelectedScene.Get());
-	//if (!scene)
-	//{
-	//	Debug::Error << "Unable to save scene, scene ptr was null" << std::endl;
-	//	return;
-	//}
-	//scene->Save();
 }
 
 void Inspector::Duplicate()

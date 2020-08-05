@@ -185,6 +185,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CameraController.cpp" />
+    <ClCompile Include="DropManager.cpp" />
     <ClCompile Include="Hierarchy.cpp" />
     <ClCompile Include="Inspector\CommandQueue.cpp" />
     <ClCompile Include="Editor.cpp" />
@@ -196,13 +197,16 @@
     <ClCompile Include="Preferences.cpp" />
     <ClCompile Include="Resources\ResourceBrowser.cpp" />
     <ClCompile Include="Resources\ResourceViewer.cpp" />
+    <ClCompile Include="Resources\SceneViewer.cpp" />
     <ClCompile Include="Theme\Theme.cpp" />
     <ClCompile Include="Viewport.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraController.h" />
+    <ClInclude Include="DropManager.h" />
     <ClInclude Include="Resources\PrefabViewer.h" />
     <ClInclude Include="Preferences.h" />
+    <ClInclude Include="Resources\SceneViewer.h" />
     <ClInclude Include="Theme\EditorColorPicker.h" />
     <ClInclude Include="Hierarchy.h" />
     <ClInclude Include="Inspector\CommandQueue.h" />

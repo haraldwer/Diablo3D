@@ -23,7 +23,9 @@ public:
 	void SetEnabled(bool aEnabled);
 	bool GetEnabled() const;
 	bool Destroy();
-
+	void SetName(const std::string& aName);
+	std::string GetName() const;
+	
 	// List of systems where this entity has component data
 	std::vector<std::type_index> GetSystemRefs() const;
 	
@@ -37,5 +39,6 @@ private:
 	Transform myTransform;
 	bool myEnabled;
 	std::vector<std::type_index> mySystemRefs;
+	std::string myName;
 };
 

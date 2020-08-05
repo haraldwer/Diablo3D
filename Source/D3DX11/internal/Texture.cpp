@@ -9,24 +9,26 @@ Texture::Texture(): m_targaData(nullptr), m_texture(nullptr), m_textureView(null
 
 bool Texture::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, const char* filename)
 {
-	//const size_t cSize = strlen(filename) + 1;
-	//wchar_t* wc = new wchar_t[cSize];
-	//mbstowcs(wc, filename, cSize);
-	//
-	//DirectX::CreateDDSTextureFromFile(device, wc, (ID3D11Resource**)(&m_texture), &m_textureView);
+	HRESULT hResult;
+	const size_t cSize = strlen(filename) + 1;
+	wchar_t* wc = new wchar_t[cSize];
+	size_t c = 0;
+	size_t max = cSize;
+	mbstowcs_s(&c, wc, cSize, filename, max);
+	hResult = DirectX::CreateDDSTextureFromFile(device, wc, (ID3D11Resource**)(&m_texture), &m_textureView);
+	if (!FAILED(hResult)) // Try to load as targa if failed
+		return true;
 	
 	bool result;
 	int height, width;
 	D3D11_TEXTURE2D_DESC textureDesc;
-	HRESULT hResult;
 	unsigned int rowPitch;
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 
 	// Load targa image
 	result = LoadTarga(filename, height, width);
 	if (!result)
-	{
-		
+	{	
 		return false;
 	}
 

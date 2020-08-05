@@ -17,6 +17,7 @@ bool ResourceViewer::WindowUpdate(Engine* anEngine)
 	EngineResource* resource = anEngine->GetServiceLocator().GetService<ResourceManager>().GetResource(myResourceID);
 	if(resource)
 	{
+		ImGui::PushID(resource);
 		if (ImGui::Begin(resource->myName.c_str(), &myIsOpen))
 		{
 			ImGui::Text(("ID: " + std::to_string(resource->myID)).c_str());
@@ -26,6 +27,7 @@ bool ResourceViewer::WindowUpdate(Engine* anEngine)
 			Update(resource, anEngine);
 		}
 		ImGui::End();
+		ImGui::PopID();
 	}
 	else
 	{

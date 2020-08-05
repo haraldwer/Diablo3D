@@ -5,7 +5,7 @@
 bool Viewport::myIsFocused;
 
 void Viewport::Update(D3DSystem& system)
-{
+{	
 	myPos = ImGui::GetWindowPos();
 	mySize = ImGui::GetWindowSize();
 	system.SetResolution(mySize.x, mySize.y);

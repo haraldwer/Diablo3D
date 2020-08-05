@@ -4,6 +4,7 @@
 	"ID":3,
 	"Ext":"json",
 	"Entities":[{
+		"Name":"",
 		"Prefab":0,
 		"Transform":[1.0,
 		0.0,
@@ -24,13 +25,11 @@
 		"Overrides":{
 			"Model Renderer":{
 				
-			},
-			"Rigidbody":{
-				
 			}
 		}
 	},
 	{
+		"Name":"",
 		"Prefab":0,
 		"Transform":[0.8496845364570618,
 		0.0,

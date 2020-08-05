@@ -3,6 +3,9 @@
 #include "../ImGui/imgui.h"
 #include "ResourceViewer.h"
 #include "PrefabViewer.h"
+#include "../DropManager.h"
+#include <fstream>
+#include "SceneViewer.h"
 
 ResourceBrowser::ResourceBrowser(): myManager(nullptr)
 {
@@ -20,10 +23,15 @@ void ResourceBrowser::Update(Engine* anEngine)
 	ResourceManager::Folder* base = myManager->GetFolder();
 	ImGui::SetNextTreeNodeOpen(true);
 	Folder(base);
-
+	
 	for (int i = myResourceViewers.size() - 1; i >= 0; i--)
+	{
 		if (!myResourceViewers[i]->WindowUpdate(anEngine))
+		{
+			delete(myResourceViewers[i]);
 			myResourceViewers.erase(myResourceViewers.begin() + i);
+		}
+	}
 }
 
 void ResourceBrowser::Folder(ResourceManager::Folder* aFolder)
@@ -38,34 +46,7 @@ void ResourceBrowser::Folder(ResourceManager::Folder* aFolder)
 
 		for(auto& it : aFolder->resources)
 		{
-			if(!it)
-			{
-				if (ImGui::TreeNodeEx("Unable to get resource ptr", ImGuiTreeNodeFlags_Leaf))
-					ImGui::TreePop();
-				continue;
-			}
-
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf;
-			const bool selected = GetIsResourceSelected(it->myID);
-			if (selected)
-				flags = ImGuiTreeNodeFlags_Bullet;
-			const bool open = ImGui::TreeNodeEx(it->myName.c_str(), flags);
-			if (ImGui::BeginPopupContextItem())
-			{
-				if(LoadedContextMenu(it))
-				{
-					ImGui::EndPopup();
-					if (open)
-						ImGui::TreePop();
-					ImGui::TreePop();
-					return;
-				}
-				ImGui::EndPopup();
-			}
-			if (open)
-				ImGui::TreePop();
-			if (ImGui::IsItemClicked())
-				selected ? DeselectResource(it) : SelectResource(it); // If already selected, deselect. Else select.
+			File(it, aFolder);
 		}
 
 		for(auto& it : aFolder->unloadedResources)
@@ -88,6 +69,119 @@ void ResourceBrowser::Folder(ResourceManager::Folder* aFolder)
 		}
 		ImGui::TreePop();
 	}
+	if (ImGui::IsItemHovered())
+		CopyDrop(aFolder->path);
+	NormalDrop(aFolder->path);
+}
+
+void ResourceBrowser::File(EngineResource* aResource, ResourceManager::Folder* aFolder)
+{
+	if (!aResource)
+	{
+		if (ImGui::TreeNodeEx("Unable to get resource ptr", ImGuiTreeNodeFlags_Leaf))
+			ImGui::TreePop();
+		return;
+	}
+
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf;
+	const bool selected = GetIsResourceSelected(aResource->myID);
+	if (selected)
+		flags = ImGuiTreeNodeFlags_Bullet;
+	const bool open = ImGui::TreeNodeEx(aResource->myName.c_str(), flags);
+	if (ImGui::BeginPopupContextItem())
+	{
+		if (LoadedContextMenu(aResource))
+		{
+			ImGui::EndPopup();
+			if (open)
+				ImGui::TreePop();
+			ImGui::TreePop();
+			return;
+		}
+		ImGui::EndPopup();
+	}
+	if (open)
+		ImGui::TreePop();
+	ImGuiDragDropFlags src_flags = 0;
+	src_flags |= ImGuiDragDropFlags_SourceNoDisableHover;     // Keep the source displayed as hovered
+	if (ImGui::BeginDragDropSource(src_flags))
+	{
+		ImGui::SetDragDropPayload("RESOURCE", &aResource->myID, sizeof(ResourceID));
+		ImGui::EndDragDropSource();
+	}
+	else if (ImGui::IsItemClicked())
+		selected ? DeselectResource(aResource) : SelectResource(aResource); // If already selected, deselect. Else select.
+	else if (ImGui::IsItemHovered())
+		CopyDrop(aFolder->path);
+	NormalDrop(aFolder->path);
+	
+}
+
+bool ResourceBrowser::CopyLocal(const std::string& aSrc, const std::string& aDest)
+{
+	const std::ifstream src(aSrc, std::ios::binary);
+	std::ofstream dest(aDest, std::ios::binary);
+	dest << src.rdbuf();
+	if (!dest || !src)
+	{
+		Debug::Error << "Unable to copy file " << aSrc << " to " << aDest << std::endl;
+		return false;
+	}
+	return true;
+}
+
+bool ResourceBrowser::CopyDrop(const std::string& aDest)
+{
+	// Actual files
+	std::vector<std::wstring> files;
+	if (DropManager::GetDragDropFiles(files))
+	{
+		for (auto& it : files)
+		{
+			const std::string str(it.begin(), it.end());
+			const std::string path = aDest + "/" + ResourceManager::GetNameFromPath(str);
+			CopyLocal(str, path);
+			myManager->ImportResource(path);
+		}
+		return true;
+	}
+	return false;
+}
+
+bool ResourceBrowser::NormalDrop(const std::string& aDest)
+{
+	if (ImGui::BeginDragDropTarget())
+	{
+		ImGuiDragDropFlags target_flags = 0;
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE", target_flags))
+		{
+			ResourceID id = *(ResourceID*)payload->Data;
+			// Get resource
+			// Copy files
+			// Edit path in resource class
+			auto resource = myManager->GetResource(id);
+			if (resource)
+			{
+				const std::string path = aDest + "/" + resource->myName + ".";
+				CopyLocal(resource->myPath, path + resource->myExt);
+				std::remove(resource->myPath.c_str());
+				if(resource->myExt != "json")
+				{
+					const std::string jsonPath = ResourceManager::ClipExt(resource->myPath) + ".";
+					CopyLocal(jsonPath + "json", path + "json");
+					std::remove((jsonPath + "json").c_str());
+				}
+				resource->myPath = path + resource->myExt;
+				
+				myManager->LoadResources();
+				ImGui::EndDragDropTarget();
+				return true;
+			}
+		}
+		ImGui::EndDragDropTarget();
+		return false;
+	}
+	return false;
 }
 
 void ResourceBrowser::SelectResource(EngineResource* aResource)
@@ -112,6 +206,7 @@ void ResourceBrowser::DeselectResource(EngineResource* aResource)
 	{
 		if (myResourceViewers[i]->GetResourceID() == aResource->myID)
 		{
+			delete(myResourceViewers[i]);
 			myResourceViewers.erase(myResourceViewers.begin() + i);
 			return;
 		}
@@ -136,9 +231,11 @@ ResourceViewer* ResourceBrowser::CreateResourceViewer(EngineResource* aResource)
 	case ResourceType::PREFAB:
 		viewer = new PrefabViewer(aResource->myType, aResource->myID);
 		break;
+	case ResourceType::SCENE:
+		viewer = new SceneViewer(aResource->myType, aResource->myID);
+		break;
 	case ResourceType::MODEL:
 	case ResourceType::TEXTURE:
-	case ResourceType::SCENE:
 	default:
 		viewer = new ResourceViewer(aResource->myType, aResource->myID);
 		break;

@@ -231,11 +231,17 @@ void ResourceManager::ImportResource(const std::string& aPath)
 	rapidjson::Writer<rapidjson::StringBuffer> writer(s);
 	writer.StartObject();
 
-	ResourceType type;
+	ResourceType type = ResourceType::UNKNOWN;
 	if (ext == "tga" || ext == "dds")
 		type = ResourceType::TEXTURE;
 	if (ext == "obj" || ext == "fbx")
 		type = ResourceType::MODEL;
+	if(type._value == ResourceType::UNKNOWN)
+	{
+		Debug::Error << "Failed to import resource " << aPath << ", unknown type" << std::endl;
+		LoadResources();
+		return;
+	}
 	
 	auto resource = new EngineResource();
 	resource->myName = ClipExt(GetNameFromPath(aPath));

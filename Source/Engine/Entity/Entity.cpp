@@ -28,6 +28,7 @@ Transform& Entity::GetTransform()
 void Entity::Serialize(rapidjson::Writer<rapidjson::StringBuffer>& aBase) const
 {
 	aBase.StartObject();
+	Serialize::Serialize("Name", myName, aBase);
 	Serialize::Serialize("Prefab", myPrefabID, aBase);
 	Serialize::Serialize("Transform", myTransform.GetMatrix(), aBase);
 	auto& sysMan = ServiceLocator::Instance().GetService<CSystemManager>();
@@ -45,6 +46,7 @@ void Entity::Serialize(rapidjson::Writer<rapidjson::StringBuffer>& aBase) const
 
 void Entity::Deserialize(const rapidjson::Value::Object& aContainer)
 {
+	Deserialize::Deserialize(aContainer, "Name", myName);
 	CommonUtilities::Matrix4x4<float> matrix = myTransform.GetMatrix();
 	Deserialize::Deserialize(aContainer, "Transform", matrix);
 	myTransform.SetMatrix(matrix);
@@ -69,6 +71,16 @@ bool Entity::Destroy()
 		return false;
 	}
 	return scene->DestroyEntity(myID);
+}
+
+void Entity::SetName(const std::string& aName)
+{
+	myName = aName; 
+}
+
+std::string Entity::GetName() const
+{
+	return myName;
 }
 
 void Entity::SetEnabled(bool aEnabled)
@@ -100,6 +112,7 @@ void Entity::Construct(const EntityID anID, const PrefabID aPrefabID, const Scen
 	mySceneID = aSceneID;
 	myTransform = Transform();
 	mySystemRefs.clear();
+	myName = "";
 }
 
 void Entity::Destruct()

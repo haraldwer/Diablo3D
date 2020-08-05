@@ -18,11 +18,12 @@ public:
 	void Duplicate();
 	void Delete();
 	void HideShowCommand(bool aPerform);
+	void Save();
 private:
+	void EditName(Entity* anEntity);
 	Entity* GetEntity(const SceneID aScene, const EntityID aEntity) const;
 	void EditTranform(Transform& aTransform);
 	void EditComponents(Entity* anEntity);
-	void Save();
 	
 	Preference<EntityID> mySelectedID;
 	Preference<SceneID> mySelectedScene;

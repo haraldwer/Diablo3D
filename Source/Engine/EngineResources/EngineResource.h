@@ -10,7 +10,8 @@ BETTER_ENUM(ResourceType, int,
 	PREFAB,
 	SCENE,
 	MODEL,
-	TEXTURE
+	TEXTURE,
+	UNKNOWN
 )
 
 typedef int ResourceID;
