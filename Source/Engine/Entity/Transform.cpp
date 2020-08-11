@@ -30,87 +30,119 @@ inline void GetMatrixScale(float& x, float& y, float& z, const Mat4f& object)
 void Transform::SetPosition(const Vec3F& aPosition)
 {
 	myTransform.p = { aPosition.x, aPosition.y, aPosition.z };
-	myMatrix(4, 1) = aPosition.x;
-	myMatrix(4, 2) = aPosition.y;
-	myMatrix(4, 3) = aPosition.z;
 }
 
 void Transform::SetRotation(const Vec3F& aRotation)
 {
-	// This one doesn't work yet
-	auto pos = GetPosition();
-	auto scale = GetScale();
-	myMatrix = CommonUtilities::Matrix4x4<float>();
-	Rotate(aRotation);
-	SetPosition(pos);
-	SetScale(scale);
+	myTransform.q.x = aRotation.x;
+	myTransform.q.y = aRotation.y;
+	myTransform.q.z = aRotation.z;
 }
 
 void Transform::Rotate(const Vec3F& aRotation)
 {
-	myMatrix = myMatrix * 
-		Mat4f::CreateRotationAroundX(aRotation.x) *
-		Mat4f::CreateRotationAroundY(aRotation.y) * 
-		Mat4f::CreateRotationAroundZ(aRotation.z);
+	myTransform.rotate({ 
+		aRotation.x,
+		aRotation.y,
+		aRotation.z
+	});
 }
 
 void Transform::SetScale(Vec3F aScale)
 {
-	const Vec3F currScale = GetScale();
-	aScale.x /= currScale.x;
-	aScale.y /= currScale.y;
-	aScale.z /= currScale.z;
-
-	for (int i = 0; i < 4; i++)
-		myMatrix(1, i + 1) *= aScale.x;
-	for (int i = 0; i < 4; i++)
-		myMatrix(2, i + 1) *= aScale.y;
-	for (int i = 0; i < 4; i++)
-		myMatrix(3, i + 1) *= aScale.z;
+	// Doesn't currently work
 }
 
 void Transform::SetMatrix(const Mat4f& aMatrix)
 {
-	myMatrix = aMatrix;
+	physx::PxMat44 mat;
+	mat.column0 = {
+		aMatrix(1, 1),
+		aMatrix(2, 1),
+		aMatrix(3, 1),
+		aMatrix(4, 1)
+	};
+	mat.column1 = {
+		aMatrix(1, 2),
+		aMatrix(2, 2),
+		aMatrix(3, 2),
+		aMatrix(4, 2)
+	};
+	mat.column2 = {
+		aMatrix(1, 3),
+		aMatrix(2, 3),
+		aMatrix(3, 3),
+		aMatrix(4, 3)
+	};
+	mat.column3 = {
+		aMatrix(1, 4),
+		aMatrix(2, 4),
+		aMatrix(3, 4),
+		aMatrix(4, 4)
+	};
+	myTransform = physx::PxTransform(mat);
 }
 
 void Transform::SetMatrix(const float* aMatrix)
 {
-	for (int y = 0; y < 4; y++)
-	{
-		for (int x = 0; x < 4; x++)
-		{
-			myMatrix(y + 1, x + 1) = aMatrix[y * 4 + x];
-		}
-	}
+	physx::PxMat44 mat;
+	mat.column0 = {
+		aMatrix[0 * 4 + 0],
+		aMatrix[1 * 4 + 0],
+		aMatrix[2 * 4 + 0],
+		aMatrix[3 * 4 + 0]
+	};
+	mat.column1 = {
+		aMatrix[0 * 4 + 1],
+		aMatrix[1 * 4 + 1],
+		aMatrix[2 * 4 + 1],
+		aMatrix[3 * 4 + 1]
+	};
+	mat.column2 = {
+		aMatrix[0 * 4 + 2],
+		aMatrix[1 * 4 + 2],
+		aMatrix[2 * 4 + 2],
+		aMatrix[3 * 4 + 2]
+	};
+	mat.column3 = {
+		aMatrix[0 * 4 + 3],
+		aMatrix[1 * 4 + 3],
+		aMatrix[2 * 4 + 3],
+		aMatrix[3 * 4 + 3]
+	};
+	myTransform = physx::PxTransform(mat);
 }
 
 Vec3F Transform::GetPosition() const
 {
 	return {
-		myMatrix(4, 1),
-		myMatrix(4, 2),
-		myMatrix(4, 3)
+		myTransform.q.x,
+		myTransform.q.y,
+		myTransform.q.z
 	};
 }
 
 Vec3F Transform::GetRotation() const
 {
-	Vec3F rot;
-	GetMatrixRot(rot.x, rot.y, rot.z, myMatrix);
-	return rot;
+	return {
+		myTransform.p.x,
+		myTransform.p.y,
+		myTransform.p.z,
+	};
 }
 
 Vec3F Transform::GetScale() const
 {
 	Vec3F scale;
-	GetMatrixScale(scale.x, scale.y, scale.z, myMatrix);
+	//GetMatrixScale(scale.x, scale.y, scale.z, myMatrix);
 	return scale;
 }
 
 Mat4f Transform::GetMatrix() const
 {
-	return myMatrix;
+	Mat4f mat;
+	//mat(0, 0);
+	return mat;
 }
 
 void Transform::GetMatrix(float* aMatrix)
@@ -119,7 +151,7 @@ void Transform::GetMatrix(float* aMatrix)
 	{
 		for(int x = 0; x < 4; x++)
 		{
-			aMatrix[y * 4 + x] = myMatrix(y + 1, x + 1);
+			//aMatrix[y * 4 + x] = myMatrix(y + 1, x + 1);
 		}
 	}
 }

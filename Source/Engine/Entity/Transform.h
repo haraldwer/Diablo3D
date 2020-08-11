@@ -32,7 +32,7 @@ public:
 	physx::PxTransform& GetPhysXRef();
 
 private:
-	CommonUtilities::Matrix4x4<float> myMatrix;
+	//CommonUtilities::Matrix4x4<float> myMatrix;
 	physx::PxTransform myTransform;
 };
 
