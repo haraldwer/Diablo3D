@@ -71,6 +71,7 @@ SceneID SceneManager::LoadScene(EngineResource* aSceneResource)
 	}
 	
 	Scene* scene = new Scene(id, path);
+	ServiceLocator::Instance().GetService<PhysicsManager>().CreateScene(id);
 	myScenes[id] = scene;
 	scene->Load(doc);
 	return id;

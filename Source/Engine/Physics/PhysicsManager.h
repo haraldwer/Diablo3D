@@ -2,6 +2,7 @@
 #include "../Utility/ServiceLocator.h"
 #include "../../Include/PhysX/PxPhysicsAPI.h"
 #include "../Scenes/Scene.h"
+#include "../Engine/ECS/ComponentSystems/Collider.h"
 
 #define PVD_HOST "127.0.0.1"
 
@@ -14,14 +15,14 @@ public:
 	void Update();
 	void Shutdown();
 	
-	void							CreateScene(SceneID aSceneID);
-	void							DestroyScene(SceneID aSceneID);
+	void				CreateScene(SceneID aSceneID);
+	void				DestroyScene(SceneID aSceneID);
 	
-	physx::PxRigidDynamic*			CreateDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, SceneID scene);
-	physx::PxRigidStatic*			CreateStatic(const physx::PxTransform& t, const physx::PxGeometry& geometry, SceneID scene);
-	
-	void DestroyActor(physx::PxActor* rb, SceneID scene);
-	
+	physx::PxShape*		CreateShape(const physx::PxGeometry& aGeometry);
+	physx::PxShape*		CreateShape(const physx::PxGeometry& aGeometry, const physx::PxMaterial& aMaterial);
+	physx::PxRigidBody*	CreateRigidDynamic(const physx::PxTransform& aPxTransform, SceneID aScene);
+
+
 private:
 	physx::PxDefaultAllocator		myAllocator;
 	physx::PxDefaultErrorCallback	myErrorCallback;

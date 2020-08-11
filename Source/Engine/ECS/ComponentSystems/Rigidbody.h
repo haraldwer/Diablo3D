@@ -1,21 +1,18 @@
 #pragma once
 #include "Engine/ECS/Data/EntityData.h"
 #include "Engine/ECS/System.h"
-#include <PhysX/PxActor.h>
-#include <PhysX/geometry/PxBoxGeometry.h>
+#include <PhysX/PxRigidBody.h>
 
 class RBData : public EntityData
 {
 	friend class Rigidbody;
+	friend class Collider;
 public:
-	RBData() :
-	myIsStatic("myIsStatic", EditorControls::CHECKBOX)
+	RBData() : myBody(nullptr)
 	{}
 	
 private:
-	Serializable<bool> myIsStatic;
-	physx::PxActor* myActor;
-	physx::PxBoxGeometry myShape;
+	physx::PxRigidBody* myBody;
 };
 
 class Rigidbody : public System<Rigidbody, RBData>

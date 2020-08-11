@@ -60,45 +60,25 @@ void PhysicsManager::Shutdown()
 	myFoundation = nullptr;
 }
 
-physx::PxRigidDynamic* PhysicsManager::CreateDynamic(const physx::PxTransform& t, const physx::PxGeometry& geometry, SceneID scene)
+physx::PxShape* PhysicsManager::CreateShape(const physx::PxGeometry& aGeometry)
 {
-	if(!myScenes[scene])
-	{
-		Debug::Error << "Unable to create dynamic, PhysicsScene with ID " << scene << " does not exist" << std::endl;
-		return nullptr;
-	}
-	physx::PxRigidDynamic* dynamic = PxCreateDynamic(*myPhysics, t, geometry, *myMaterial, 10.0f);
-	dynamic->setAngularDamping(0.5f);
-	myScenes[scene]->addActor(*dynamic);
-	return dynamic;
+	return CreateShape(aGeometry, *myMaterial);
 }
 
-physx::PxRigidStatic* PhysicsManager::CreateStatic(const physx::PxTransform& t, const physx::PxGeometry& geometry, SceneID scene)
+physx::PxShape* PhysicsManager::CreateShape(const physx::PxGeometry& aGeometry, const physx::PxMaterial& aMaterial)
 {
-	if (!myScenes[scene])
-	{
-		Debug::Error << "Unable to create dynamic, PhysicsScene with ID " << scene << " does not exist" << std::endl;
-		return nullptr;
-	}
-	physx::PxRigidStatic* rb = physx::PxCreateStatic(*myPhysics, t, geometry, *myMaterial);
-	myScenes[scene]->addActor(*rb);
-	return rb;
+	return myPhysics->createShape(aGeometry, aMaterial);
 }
 
-void PhysicsManager::DestroyActor(physx::PxActor* rb, SceneID scene)
+physx::PxRigidBody* PhysicsManager::CreateRigidDynamic(const physx::PxTransform& aPxTransform, SceneID aScene)
 {
-	if (!rb)
-		return;
-	auto find = myScenes.find(scene);
-	if(find == myScenes.end())
-	{
-		Debug::Error << "Cannot remove dynamic from scene which does not exist. SceneID: " << scene << std::endl;
-	}
-	else
-	{
-		find->second->removeActor(*rb);
-	}
-	rb->release();
+	auto find = myScenes.find(aScene);
+	if (find == myScenes.end())
+		return nullptr;
+	auto ptr = myPhysics->createRigidDynamic(aPxTransform);
+	if(ptr)
+		find->second->addActor(*ptr);
+	return ptr;
 }
 
 void PhysicsManager::CreateScene(SceneID aSceneID)
@@ -116,7 +96,8 @@ void PhysicsManager::CreateScene(SceneID aSceneID)
 	sceneDesc.filterShader = physx::PxDefaultSimulationFilterShader;
 	
 	auto scene = myPhysics->createScene(sceneDesc);
-
+	myScenes[aSceneID] = scene;
+	
 	physx::PxPvdSceneClient* pvdClient = scene->getScenePvdClient();
 	if (pvdClient) // Print debug info
 	{

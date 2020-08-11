@@ -1,7 +1,7 @@
 #pragma once
 #include "../CommonUtilities/Vector3.h"
 #include "../CommonUtilities/Matrix4x4.h"
-#include <PhysX/foundation/PxTransform.h>
+#include "../../Include/PhysX/PxPhysicsAPI.h"
 
 typedef CommonUtilities::Vector3<float> Vec3F;
 typedef CommonUtilities::Matrix4x4<float> Mat4f;

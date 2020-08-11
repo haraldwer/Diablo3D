@@ -29,6 +29,7 @@ inline void GetMatrixScale(float& x, float& y, float& z, const Mat4f& object)
 
 void Transform::SetPosition(const Vec3F& aPosition)
 {
+	myTransform.p = { aPosition.x, aPosition.y, aPosition.z };
 	myMatrix(4, 1) = aPosition.x;
 	myMatrix(4, 2) = aPosition.y;
 	myMatrix(4, 3) = aPosition.z;

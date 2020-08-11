@@ -1,6 +1,7 @@
 #pragma once
 #include "ComponentSystems/ModelRenderer.h"
 #include "ComponentSystems/Rigidbody.h"
+#include "ComponentSystems/Collider.h"
 
 class CSystems
 {
@@ -9,4 +10,5 @@ class CSystems
 	// Engine systems
 	ModelRenderer myModelRenderer;
 	Rigidbody myRigidbody;
+	Collider myCollider;
 };
