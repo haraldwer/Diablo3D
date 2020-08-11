@@ -21,11 +21,13 @@ void PhysicsManager::Init()
 	//myScene->addActor(*groundPlane);
 }
 
-void PhysicsManager::Update()
+void PhysicsManager::Update(bool run)
 {
+	if (!run)
+		return;
 	for(auto& scene : myScenes)
 	{
-		scene.second->simulate(1.0f / 60.0f);
+		scene.second->simulate(1.0f / 2000.0f);
 		scene.second->fetchResults(true);
 	}
 }

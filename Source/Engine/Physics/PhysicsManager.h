@@ -12,7 +12,7 @@ public:
 	PhysicsManager();
 	std::string GetName() override { return "Physics Manager"; }
 	void Init();
-	void Update();
+	void Update(bool run);
 	void Shutdown();
 	
 	void				CreateScene(SceneID aSceneID);

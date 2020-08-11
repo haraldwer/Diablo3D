@@ -22,7 +22,7 @@ void Engine::Shutdown()
 void Engine::Update(bool run)
 {
 	myComponentManager.Update(run);
-	myPhysicsManager.Update();
+	myPhysicsManager.Update(run);
 }
 
 void Engine::LateUpdate()

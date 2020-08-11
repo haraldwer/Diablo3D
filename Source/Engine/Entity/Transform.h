@@ -17,7 +17,7 @@ public:
 	// Rotation in Euler-angles
 	void SetRotation(const Vec3F& aRotation);
 	void Rotate(const Vec3F& aRotation);
-	void SetScale(Vec3F aScale);
+	void SetScale(const Vec3F& aScale);
 	void SetMatrix(const Mat4f& aMatrix);
 	// Input param needs to be float[16], representing a 4x4 matrix.
 	void SetMatrix(const float* aMatrix);
@@ -30,9 +30,10 @@ public:
 	// Input param needs to be float[16], representing a 4x4 matrix. 
 	void GetMatrix(float* aMatrix);
 	physx::PxTransform& GetPhysXRef();
+	void UpdatePhysRef();
 
 private:
-	//CommonUtilities::Matrix4x4<float> myMatrix;
+	CommonUtilities::Matrix4x4<float> myMatrix;
 	physx::PxTransform myTransform;
 };
 

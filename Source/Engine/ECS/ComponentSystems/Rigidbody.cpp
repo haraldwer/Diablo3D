@@ -9,9 +9,7 @@ void Rigidbody::Update()
 {
 	GetContainer().Iterate([&](const EntityID anEntityID, RBData& someData)
 	{
-		Transform& trans = someData.GetEntity()->GetTransform();
-		const auto p = trans.GetPhysXRef().p;
-		trans.SetPosition({ p.x, p.y, p.z });
+		someData.GetEntity()->GetTransform().UpdatePhysRef();
 		return true;
 	});
 }
