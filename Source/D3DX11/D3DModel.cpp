@@ -1,5 +1,6 @@
 #include "D3DModel.h"
 #include "D3DSystem.h"
+#include "internal/Model.h"
 
 D3DModel::D3DModel(const char* aModelPath, const char* aTexturePath): myMatrix(), myModel(nullptr)
 {
@@ -21,4 +22,9 @@ void D3DModel::SetMatrix(float* aMatrix)
 void D3DModel::Render()
 {
 	D3DSystem::RenderModel(this);
+}
+
+ID3D11ShaderResourceView* D3DModel::GetThumbnail()
+{
+	return nullptr;
 }

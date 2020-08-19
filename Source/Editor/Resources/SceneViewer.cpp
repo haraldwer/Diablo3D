@@ -9,8 +9,9 @@ SceneViewer::SceneViewer(const ResourceType& aType, const ResourceID aResourceID
 
 void SceneViewer::Update(EngineResource* aResource, Engine* anEngine)
 {
-	auto& sceneManager = anEngine->GetServiceLocator().GetService<SceneManager>();
-
 	if (ImGui::Button("Load"))
+	{
+		auto& sceneManager = anEngine->GetServiceLocator().GetService<SceneManager>();
 		sceneManager.LoadScene(aResource->myID);
+	}
 }

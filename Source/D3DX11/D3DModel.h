@@ -3,6 +3,7 @@
 
 class Model;
 class Texture;
+class ID3D11ShaderResourceView;
 
 class D3DModel
 {
@@ -14,6 +15,7 @@ public:
 	
 	// Add to render queue in D3DX11
 	void Render();
+	ID3D11ShaderResourceView* GetThumbnail();
 	
 private:
 	DirectX::XMMATRIX myMatrix;

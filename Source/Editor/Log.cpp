@@ -1,4 +1,6 @@
 #include "Log.h"
+#include "../ImGui/imgui.h"
+#include <algorithm>
 
 void Log::Update()
 {
@@ -7,10 +9,31 @@ void Log::Update()
 	static ImVector<int>       LineOffsets;        // Index to lines offset
 	static bool                ScrollToBottom;
 
-	AddLogs(Debug::Error, ScrollToBottom, Buf, LineOffsets);
-	AddLogs(Debug::Warning, ScrollToBottom, Buf, LineOffsets);
-	AddLogs(Debug::Log, ScrollToBottom, Buf, LineOffsets);
+	std::vector<TmpLog> entries;
 
+	AddLogs(Debug::Error, entries);
+	AddLogs(Debug::Warning, entries);
+	AddLogs(Debug::Log, entries);
+	Debug::Logger::Clear();
+
+	if(!entries.empty())
+	{
+		std::sort(entries.begin(), entries.end(), [](TmpLog& a, TmpLog& b)
+		{
+			return a.entry.time < b.entry.time;
+		});
+		for (auto& it : entries)
+		{
+			int old_size = Buf.size();
+			Buf.append(it.entry.message.c_str());
+			Buf.append("\n");
+			for (int new_size = Buf.size(); old_size < new_size; old_size++)
+				if (Buf[old_size] == '\n')
+					LineOffsets.push_back(old_size);
+		}
+		ScrollToBottom = true;
+	}
+	
 	if (ImGui::Button("Clear"))
 	{
 		Buf.clear();
@@ -49,21 +72,9 @@ void Log::Update()
 	ImGui::EndChild();
 }
 
-void Log::AddLogs(Debug::Logger& logger, bool& ScrollToBottom, ImGuiTextBuffer& Buf, ImVector<int>& LineOffsets)
+void Log::AddLogs(Debug::Logger& logger, std::vector<TmpLog>& entries)
 {
 	auto& logs = logger.Get();
-	if (!logs.empty())
-	{
-		for (auto& it : logs)
-		{
-			int old_size = Buf.size();
-			Buf.append(it.message.c_str());
-			Buf.append("\n");
-			for (int new_size = Buf.size(); old_size < new_size; old_size++)
-				if (Buf[old_size] == '\n')
-					LineOffsets.push_back(old_size);
-		}
-		ScrollToBottom = true;
-		logs.clear();
-	}
+	for(auto& it : logs)
+		entries.push_back({ logger.GetType(), it });
 }

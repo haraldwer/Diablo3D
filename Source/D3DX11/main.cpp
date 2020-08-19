@@ -5,7 +5,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
 {
 	CreateParams params;
 	D3DSystem System;
-	if (System.Initialize(params))
+	if (System.Initialize(&params))
 		System.Run();
 	System.Shutdown();
 	return 0;

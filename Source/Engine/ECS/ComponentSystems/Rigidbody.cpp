@@ -18,9 +18,10 @@ void Rigidbody::AddEntity(Entity* anEntity)
 {
 	if (!anEntity)
 		return;
+	auto& trans = anEntity->GetTransform().GetPhysXRef();
 	auto& data = GetContainer().Insert(*anEntity);
 	auto& physMan = ServiceLocator::Instance().GetService<PhysicsManager>();	
-	data.myBody = physMan.CreateRigidDynamic(anEntity->GetTransform().GetPhysXRef(), anEntity->GetSceneID());
+	data.myBody = physMan.CreateRigidDynamic(trans, anEntity->GetSceneID());
 }
 
 void Rigidbody::RemoveEntity(EntityID anEntityID)

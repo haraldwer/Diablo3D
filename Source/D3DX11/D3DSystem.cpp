@@ -12,8 +12,11 @@ D3DSystem::D3DSystem(): m_applicationName(nullptr), m_hinstance(nullptr), m_hwnd
 {
 }
 
-bool D3DSystem::Initialize(CreateParams& params)
+bool D3DSystem::Initialize(CreateParams* params)
 {
+	if (!params)
+		return false;
+	
 	bool result;
 
 	WNDCLASSEX wc;
@@ -29,7 +32,7 @@ bool D3DSystem::Initialize(CreateParams& params)
 	m_hinstance = GetModuleHandle(NULL);
 
 	// Give the application a name.
-	m_applicationName = params.myApplicationName.c_str();
+	m_applicationName = params->myApplicationName.c_str();
 
 	// Setup the windows class with default settings.
 	wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
@@ -49,15 +52,15 @@ bool D3DSystem::Initialize(CreateParams& params)
 	RegisterClassEx(&wc);
 
 	// Setup the screen settings depending on whether it is running in full screen or in windowed mode.
-	if (params.myStartInFullScreen)
+	if (params->myFullscreen)
 	{
-		params.myWindowWidth = GetSystemMetrics(SM_CXSCREEN);
-		params.myWindowHeight = GetSystemMetrics(SM_CYSCREEN);
+		params->myWindowWidth = GetSystemMetrics(SM_CXSCREEN);
+		params->myWindowHeight = GetSystemMetrics(SM_CYSCREEN);
 		// If full screen set the screen to maximum size of the users desktop and 32bit.
 		memset(&dmScreenSettings, 0, sizeof(dmScreenSettings));
 		dmScreenSettings.dmSize = sizeof(dmScreenSettings);
-		dmScreenSettings.dmPelsWidth = (unsigned long)params.myWindowWidth;
-		dmScreenSettings.dmPelsHeight = (unsigned long)params.myWindowHeight;
+		dmScreenSettings.dmPelsWidth = (unsigned long)params->myWindowWidth;
+		dmScreenSettings.dmPelsHeight = (unsigned long)params->myWindowHeight;
 		dmScreenSettings.dmBitsPerPel = 32;
 		dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
 
@@ -67,10 +70,10 @@ bool D3DSystem::Initialize(CreateParams& params)
 		// Set the position of the window to the top left corner.
 	}
 
-	if(params.myHwnd == nullptr)
+	if(params->myHwnd == nullptr)
 	{
 		DWORD windowStyle = 0;
-		switch(params.myWindowSetting)
+		switch(params->myWindowSetting)
 		{
 		case WindowSetting::OVERLAPPED:
 			windowStyle = WS_OVERLAPPEDWINDOW;
@@ -87,17 +90,17 @@ bool D3DSystem::Initialize(CreateParams& params)
 			windowStyle,
 			CW_USEDEFAULT,
 			CW_USEDEFAULT,
-			params.myWindowWidth,
-			params.myWindowHeight,
+			params->myWindowWidth,
+			params->myWindowHeight,
 			NULL,
 			NULL,
 			m_hinstance,
 			NULL);
-		params.myHwnd = &m_hwnd;
+		params->myHwnd = &m_hwnd;
 	}
 	else
 	{
-		m_hwnd = *params.myHwnd;
+		m_hwnd = *params->myHwnd;
 	}
 
 	// Bring the window up on the screen and set it as main focus.
@@ -106,7 +109,7 @@ bool D3DSystem::Initialize(CreateParams& params)
 	SetFocus(m_hwnd);
 
 	// Hide the mouse cursor.
-	if(!params.myShowCursor)
+	if(!params->myShowCursor)
 		ShowCursor(false);
 
 	// Initialize the graphics object.
@@ -115,8 +118,8 @@ bool D3DSystem::Initialize(CreateParams& params)
 		return false;
 
 	m_params = params;
-	if (m_params.myInitFunction)
-		m_params.myInitFunction();
+	if (m_params->myInitFunction)
+		m_params->myInitFunction();
 
 	m_frameCounter.Initialize();
 	m_cpuUsage.Initialize();
@@ -195,8 +198,8 @@ bool D3DSystem::Frame()
 	m_cpuUsage.Frame();
 	m_timer.Frame();
 	
-	if (m_params.myUpdateFunction)
-		m_params.myUpdateFunction();
+	if (m_params->myUpdateFunction)
+		m_params->myUpdateFunction();
 	
 	// Do the frame processing for the graphics object.
 	result = m_Graphics.Frame(m_frameCounter.GetFps(), m_cpuUsage.GetCpuPercentage(), m_timer.GetTime());
@@ -209,8 +212,8 @@ bool D3DSystem::Frame()
 
 LRESULT CALLBACK D3DSystem::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
 {
-	if(m_params.myMessageHandlerFunction)
-		m_params.myMessageHandlerFunction(hwnd, umsg, wparam, lparam);
+	if(m_params->myMessageHandlerFunction)
+		m_params->myMessageHandlerFunction(hwnd, umsg, wparam, lparam);
 	return DefWindowProc(hwnd, umsg, wparam, lparam);
 }
 

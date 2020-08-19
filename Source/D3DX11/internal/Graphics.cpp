@@ -12,28 +12,23 @@
 #include "../../CommonUtilities/Log.h"
 
 Graphics::Graphics():
-	m_hwnd(nullptr),
-	m_screenWidth(0),
-	m_screenHeight(0),
-	m_fullscreen(false),
 	m_Light(),
 	m_Text(nullptr), m_frustum()
 {
 }
 
-bool Graphics::Initialize(const CreateParams& createParams)
+bool Graphics::Initialize(CreateParams* createParams)
 {
+	if (!createParams)
+		return false;
+	
 	bool result;
 	DirectX::XMMATRIX baseViewMatrix;
 	
-	m_hwnd = *createParams.myHwnd;
-	m_screenWidth = createParams.myWindowWidth;
-	m_screenHeight = createParams.myWindowHeight;
-	m_fullscreen = createParams.myStartInFullScreen;
 	m_createParams = createParams;
 	
 	// Initialize the Direct3D object.
-	result = m_Direct3D.Initialize(createParams.myDevice, createParams.myDeviceContext, createParams.mySwapChain, createParams.myRTView, m_screenWidth, m_screenHeight, createParams.myEnableVSync, m_hwnd, m_fullscreen, SCREEN_DEPTH, SCREEN_NEAR);
+	result = m_Direct3D.Initialize(createParams, SCREEN_DEPTH, SCREEN_NEAR);
 	if (!result)
 	{
 		Debug::Error << "Could not initialize Direct3D" << std::endl;
@@ -49,7 +44,7 @@ bool Graphics::Initialize(const CreateParams& createParams)
 	if (!m_Text)
 		return false;
 
-	result = m_Text->Initialize(m_Direct3D.GetDevice(), m_Direct3D.GetDeviceContext(), m_hwnd, m_screenWidth, m_screenHeight, baseViewMatrix);
+	result = m_Text->Initialize(m_Direct3D.GetDevice(), m_Direct3D.GetDeviceContext(), *createParams->myHwnd, createParams->myWindowWidth, createParams->myWindowHeight, baseViewMatrix);
 	if (!result)
 	{
 		Debug::Error << "Could not initialize the text object" << std::endl;
@@ -57,7 +52,7 @@ bool Graphics::Initialize(const CreateParams& createParams)
 	}
 	
 	// Initialize the light shader object.
-	result = m_LightShader.Initialize(m_Direct3D.GetDevice(), m_hwnd);
+	result = m_LightShader.Initialize(m_Direct3D.GetDevice(), *createParams->myHwnd);
 	if (!result)
 	{
 		Debug::Error << "Could not initialize the light shader object." << std::endl;
@@ -65,7 +60,7 @@ bool Graphics::Initialize(const CreateParams& createParams)
 	}
 
 	// Initialize the color shader object.
-		result = m_ColorShader.Initialize(m_Direct3D.GetDevice(), m_hwnd);
+		result = m_ColorShader.Initialize(m_Direct3D.GetDevice(), *createParams->myHwnd);
 	if (!result)
 	{
 		Debug::Error << "Could not initialize the color shader object." << std::endl;
@@ -80,12 +75,12 @@ bool Graphics::Initialize(const CreateParams& createParams)
 	m_Light.SetSpecularPower(8.0f);
 	
 	// Initialize the render to texture object.
-	result = m_RenderTexture.Initialize(m_Direct3D.GetDevice(), m_screenWidth, m_screenHeight);
+	result = m_RenderTexture.Initialize(m_Direct3D.GetDevice(), createParams->myWindowWidth, createParams->myWindowHeight);
 	if (!result)
 		return false;
 
 	// Initialize the debug window object.
-	result = m_RenderTextureBitmap.Initialize(m_Direct3D.GetDevice(), m_screenWidth, m_screenHeight, 0, 0);
+	result = m_RenderTextureBitmap.Initialize(m_Direct3D.GetDevice(), createParams->myWindowWidth, createParams->myWindowHeight, 0, 0);
 	if (!result)
 	{
 		Debug::Error << "Could not initialize the debug window object." << std::endl;
@@ -93,7 +88,7 @@ bool Graphics::Initialize(const CreateParams& createParams)
 	}
 	
 	// Initialize the texture shader object.
-	result = m_TextureShader.Initialize(m_Direct3D.GetDevice(), m_hwnd);
+	result = m_TextureShader.Initialize(m_Direct3D.GetDevice(), *m_createParams->myHwnd);
 	if (!result)
 	{
 		Debug::Error << "Could not initialize the texture shader object." << std::endl;
@@ -164,27 +159,27 @@ bool Graphics::Frame(int fps, int cpu, float frameTime)
 }
 void Graphics::SetFullscreen(const bool aFullscreen)
 {
-	m_fullscreen = aFullscreen;
+	m_createParams->myFullscreen = aFullscreen;
 	m_Direct3D.SetFullscreen(aFullscreen);
 }
 
 bool Graphics::GetFullscreen() const
 {
-	return m_fullscreen;
+	return m_createParams->myFullscreen;
 }
 
 DirectX::XMINT2 Graphics::GetResolution() const
 {
-	return DirectX::XMINT2(m_screenWidth, m_screenHeight);
+	return DirectX::XMINT2(m_createParams->myWindowWidth, m_createParams->myWindowHeight);
 }
 
 void Graphics::SetResolution(int width, int height)
 {
-	if(m_screenWidth != width || m_screenHeight != height)
+	if(m_createParams->myWindowWidth != width || m_createParams->myWindowHeight != height)
 	{
-		m_screenWidth = width;
-		m_screenHeight = height;
-		m_Direct3D.SetResolution(width, height, m_fullscreen, m_hwnd, SCREEN_DEPTH, SCREEN_NEAR);
+		m_createParams->myWindowWidth = width;
+		m_createParams->myWindowHeight = height;
+		m_Direct3D.SetResolution(width, height, SCREEN_DEPTH, SCREEN_NEAR);
 		m_RenderTexture.Shutdown();
 		m_RenderTexture.Initialize(m_Direct3D.GetDevice(), width, height);
 	}
@@ -195,14 +190,14 @@ bool Graphics::Render()
 	DirectX::XMMATRIX worldMatrix, viewMatrix, orthoMatrix;
 	bool result;
 
-	if (m_createParams.myPresentFunction)
+	if (m_createParams->myPresentFunction)
 	{
 		// Render the entire scene to the texture first.
 		result = RenderToTexture();
 		if (!result)
 			return false;
 		
-		m_createParams.myPresentFunction(m_RenderTexture.GetShaderResourceView());
+		m_createParams->myPresentFunction(m_RenderTexture.GetShaderResourceView());
 	}
 	else
 	{

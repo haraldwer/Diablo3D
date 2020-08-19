@@ -21,6 +21,7 @@ static ID3D11Device* g_pd3dDevice = NULL;
 static ID3D11DeviceContext* g_pd3dDeviceContext = NULL;
 static IDXGISwapChain* g_pSwapChain = NULL;
 static ID3D11RenderTargetView* g_mainRenderTargetView = NULL;
+static CreateParams params;
 
 // Forward declarations of helper functions
 bool CreateDeviceD3D(HWND hWnd);
@@ -101,9 +102,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
     D3DSystem system;
     editor = new Editor(system);
     editor->Init();
-    CreateParams params;
-    params.myDevice = g_pd3dDevice;
-    params.myDeviceContext = g_pd3dDeviceContext;
+    
+    
     params.mySwapChain = g_pSwapChain;
     params.myRTView = g_mainRenderTargetView;
     params.myHwnd = &hwnd;
@@ -120,7 +120,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR pScmdline,
         );
     };
 	params.myMessageHandlerFunction = [&](HWND hwnd, UINT uint, WPARAM wparam, LPARAM lparam) { return editor->MessageHandler(hwnd, uint, wparam, lparam); };
-    system.Initialize(params);
+    system.Initialize(&params);
     Debug::Log << "ImGui initialized" << std::endl;
 	
     // Main loop
@@ -215,6 +215,10 @@ bool CreateDeviceD3D(HWND hWnd)
     if (D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, createDeviceFlags, featureLevelArray, 2, D3D11_SDK_VERSION, &sd, &g_pSwapChain, &g_pd3dDevice, &featureLevel, &g_pd3dDeviceContext) != S_OK)
         return false;
 
+    params.myDevice = g_pd3dDevice;
+    params.myDeviceContext = g_pd3dDeviceContext;
+    params.mySwapChain = g_pSwapChain;
+	
     CreateRenderTarget();
     return true;
 }
@@ -225,6 +229,9 @@ void CleanupDeviceD3D()
     if (g_pSwapChain) { g_pSwapChain->Release(); g_pSwapChain = NULL; }
     if (g_pd3dDeviceContext) { g_pd3dDeviceContext->Release(); g_pd3dDeviceContext = NULL; }
     if (g_pd3dDevice) { g_pd3dDevice->Release(); g_pd3dDevice = NULL; }
+    params.myDevice = nullptr;
+    params.myDeviceContext = nullptr;
+    params.mySwapChain = nullptr;
 }
 
 void CreateRenderTarget()
@@ -232,12 +239,15 @@ void CreateRenderTarget()
     ID3D11Texture2D* pBackBuffer;
     g_pSwapChain->GetBuffer(0, IID_PPV_ARGS(&pBackBuffer));
     g_pd3dDevice->CreateRenderTargetView(pBackBuffer, NULL, &g_mainRenderTargetView);
+    params.myRTView = g_mainRenderTargetView;
     pBackBuffer->Release();
+    
 }
 
 void CleanupRenderTarget()
 {
     if (g_mainRenderTargetView) { g_mainRenderTargetView->Release(); g_mainRenderTargetView = NULL; }
+    params.myRTView = nullptr;
 }
 
 #ifndef WM_DPICHANGED

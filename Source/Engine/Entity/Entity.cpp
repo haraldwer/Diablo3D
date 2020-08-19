@@ -80,6 +80,13 @@ void Entity::SetName(const std::string& aName)
 
 std::string Entity::GetName() const
 {
+	if (myName == "")
+	{
+		PrefabManager& prefabManager = ServiceLocator::Instance().GetService<PrefabManager>();
+		auto prefab = prefabManager.GetPrefab(myPrefabID);
+		if (prefab)
+			return prefab->GetName();
+	}
 	return myName;
 }
 

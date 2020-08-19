@@ -103,15 +103,17 @@ void Inspector::EditComponents(Entity* anEntity)
 			sys->EditEntity(anEntity->GetID());
 			ImGui::PopID();
 		}
+		ImGui::Spacing();
 	}
 
 	ImGui::Separator();
-
+	ImGui::Spacing();
+	
 	static int curr = 0;
 	auto systems = sysMan.GetSystems();
 	ImGui::Combo("##SysList", &curr, systems);
 	ImGui::SameLine();
-	if(ImGui::Button("Add"))
+	if(ImGui::Button("Add", {-1, 0}))
 	{
 		auto sys = sysMan.GetSystem(systems[curr]);
 		if(sys)
@@ -180,7 +182,7 @@ void Inspector::EditName(Entity* anEntity)
 	if (!anEntity)
 		return;
 
-	std::string name = anEntity->GetName();
+	std::string name = anEntity->myName;
 	std::string prefabName = "";
 	if(anEntity->GetPrefabID() != -1)
 	{
@@ -229,12 +231,32 @@ void Inspector::EditName(Entity* anEntity)
 	
 	if (ImGui::BeginPopupContextItem("Submenu"))
 	{
-		if (ImGui::MenuItem("Apply to prefab"))
+		if (anEntity->GetPrefabID() != -1)
 		{
-			// Apply name to prefab!
+			if (ImGui::MenuItem("Apply to prefab"))
+			{
+				// Apply name to prefab!
+				if(!name.empty())
+				{
+					ServiceLocator& serviceLocator = myEngine->GetServiceLocator();
+					PrefabManager& prefabManager = serviceLocator.GetService<PrefabManager>();
+					auto prefab = prefabManager.GetPrefab(anEntity->GetPrefabID());
+					if (prefab)
+					{
+						// Apply name to prefab
+						// Move in prefab name dir
+						// Delete previous resource
+						// Edit resource name
+						// Save resource
+						anEntity->myName = "";
+					}
+				}
+			}
 		}
 		ImGui::EndPopup();
 	}
+
+	ImGui::Spacing();
 }
 
 void Inspector::SetEntity(const SceneID aScene, const EntityID aEntity)
@@ -364,24 +386,6 @@ void Inspector::HideShowCommand(bool aPerform)
 		if (!scene->HideEntity(aCommand.entityID))
 			return;
 		SetEntity(-1, -1);
-
-		//aCommand.erase = [&](Command& aCommand2)
-		//{
-		//	// Recover
-		//	if (!myEngine)
-		//		return;
-		//	if (aCommand2.sceneID == -1)
-		//		return;
-		//	if (aCommand2.entityID == -1)
-		//		return;
-		//	ServiceLocator& serviceLocator = myEngine->GetServiceLocator();
-		//	SceneManager& sceneManager = serviceLocator.GetService<SceneManager>();
-		//	Scene* scene = sceneManager.GetScene(aCommand2.sceneID);
-		//	if (!scene)
-		//		return;
-		//	if (!scene->DestroyEntity(aCommand2.entityID))
-		//		return;
-		//};
 	};
 	
 	if(aPerform)
@@ -411,6 +415,32 @@ void Inspector::EditInt(SerializableBase* base, CommandQueue& queue, const std::
 		funcMap[EditorControls::NONE] = [] { return false; };
 		funcMap[EditorControls::INPUT_INT] = [&] { return ImGui::InputInt(name.c_str(), &data); };
 		funcMap[EditorControls::DEFAULT] = [&] { return ImGui::DragInt(name.c_str(), &data); };
+		funcMap[EditorControls::TEXTURE] = [&]
+		{
+			ImGui::Spacing();
+			ImGui::Text((name + ": ").c_str());
+			ImGui::SameLine();
+			ImGui::ButtonEx((std::to_string(data) + "##" + name).c_str(), { -1, 0 }, ImGuiButtonFlags_PressedOnDragDropHold);
+			if (ImGui::BeginDragDropTarget())
+			{
+				ImGuiDragDropFlags target_flags = 0;
+				const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE", target_flags);
+				if (payload)
+				{
+					ResourceID id = *(ResourceID*)payload->Data;
+					if(data != id)
+					{
+						data = id;
+						ImGui::EndDragDropTarget();
+						return true;
+					}
+				}
+				ImGui::EndDragDropTarget();
+				return false;
+			}
+			return false;
+		};
+		funcMap[EditorControls::MODEL] = funcMap[EditorControls::TEXTURE];
 	}
 
 	auto itr = funcMap.find(base->GetEditorControls());

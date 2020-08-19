@@ -42,7 +42,7 @@ struct CreateParams
         myWindowWidth = 1280;
         myWindowHeight = 720;
         myEnableVSync = false;
-        myStartInFullScreen = false;
+        myFullscreen = false;
         myShowCursor = true;
         myClearColor = { 0, 0, 0, 1 };
         myWindowSetting = WindowSetting::OVERLAPPED;
@@ -63,7 +63,7 @@ struct CreateParams
     HWND* myHwnd;
     std::wstring myApplicationName;
     bool myEnableVSync;
-    bool myStartInFullScreen;
+    bool myFullscreen;
     bool myShowCursor;
     WindowSetting myWindowSetting;
     void* myTargetTexture;
@@ -78,7 +78,7 @@ class Graphics
 public:
 	Graphics();
 
-	bool Initialize(const CreateParams& createParams);
+	bool Initialize(CreateParams* createParams);
 	void Shutdown();
 	bool Frame(int fps, int cpu, float frameTime);
     bool Render();
@@ -102,10 +102,6 @@ private:
 	
     bool RenderToTexture();
 	bool RenderScene();
-	HWND m_hwnd;
-	int m_screenWidth;
-	int m_screenHeight;
-    bool m_fullscreen;
 	D3D m_Direct3D;
 	Camera m_Camera;
 	Light m_Light;
@@ -123,7 +119,7 @@ private:
 	LightShader m_LightShader;
 	TextureShader m_TextureShader;
     ColorShader m_ColorShader;
-    CreateParams m_createParams;
+    CreateParams* m_createParams;
 
     Frustum m_frustum;
     RenderTexture m_RenderTexture;

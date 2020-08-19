@@ -8,6 +8,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include "Windows.h"
 #include "Utility/Input.h"
+#include "Utility/Time.h"
 
 class Engine
 {
@@ -26,5 +27,6 @@ private:
 	ResourceManager myResourceManager;
 	PhysicsManager myPhysicsManager;
 	Input myInput;
+	Time myTime;
 };
 

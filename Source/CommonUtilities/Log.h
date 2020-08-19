@@ -41,7 +41,8 @@ namespace Debug
 		Logger(LogType type, std::ostream& str);
 		std::vector<Entry>& Get() const;
 		LogType GetType() const;
-		
+		static void Clear();
+
 	private:
 		LoggerBuff buffer;
 		const LogType myType;

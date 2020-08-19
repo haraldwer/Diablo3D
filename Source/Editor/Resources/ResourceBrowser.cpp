@@ -7,12 +7,18 @@
 #include <fstream>
 #include "SceneViewer.h"
 
-ResourceBrowser::ResourceBrowser(): myManager(nullptr)
+ResourceBrowser::ResourceBrowser(): myManager(nullptr), myJustOpened(false)
 {
 }
 
 void ResourceBrowser::Update(Engine* anEngine)
 {
+	if(myJustOpened)
+	{
+		myJustOpened = false;
+		ImGui::SetWindowFocus();
+	}
+	
 	if (!anEngine)
 	{
 		myManager = nullptr;
@@ -41,6 +47,10 @@ void ResourceBrowser::Folder(ResourceManager::Folder* aFolder)
 	
 	if(ImGui::TreeNodeEx(aFolder->name.c_str()))
 	{
+		if (ImGui::IsItemHovered())
+			CopyDrop(aFolder->path);
+		NormalDrop(aFolder->path);
+		
 		for(auto& it : aFolder->folders)
 			Folder(it);
 
@@ -52,6 +62,9 @@ void ResourceBrowser::Folder(ResourceManager::Folder* aFolder)
 		for(auto& it : aFolder->unloadedResources)
 		{
 			const bool open = ImGui::TreeNodeEx((it->name + " (unloaded)").c_str(), ImGuiTreeNodeFlags_Leaf);
+			if (ImGui::IsItemHovered())
+				CopyDrop(aFolder->path);
+			NormalDrop(aFolder->path);
 			if (ImGui::BeginPopupContextItem())
 			{
 				if(UnloadedContextMenu(it))
@@ -69,9 +82,6 @@ void ResourceBrowser::Folder(ResourceManager::Folder* aFolder)
 		}
 		ImGui::TreePop();
 	}
-	if (ImGui::IsItemHovered())
-		CopyDrop(aFolder->path);
-	NormalDrop(aFolder->path);
 }
 
 void ResourceBrowser::File(EngineResource* aResource, ResourceManager::Folder* aFolder)
@@ -88,6 +98,20 @@ void ResourceBrowser::File(EngineResource* aResource, ResourceManager::Folder* a
 	if (selected)
 		flags = ImGuiTreeNodeFlags_Bullet;
 	const bool open = ImGui::TreeNodeEx(aResource->myName.c_str(), flags);
+	ImGuiDragDropFlags src_flags = 0;
+	if (ImGui::BeginDragDropSource(src_flags))
+	{
+		ImGui::SetDragDropPayload("RESOURCE", &aResource->myID, sizeof(ResourceID));
+		ImGui::EndDragDropSource();
+	}
+	else if (ImGui::IsItemClicked())
+	{
+		selected ? DeselectResource(aResource) : SelectResource(aResource); // If already selected, deselect. Else select.
+		myJustOpened = true;
+	}
+	else if (ImGui::IsItemHovered())
+		CopyDrop(aFolder->path);
+	NormalDrop(aFolder->path);
 	if (ImGui::BeginPopupContextItem())
 	{
 		if (LoadedContextMenu(aResource))
@@ -102,19 +126,6 @@ void ResourceBrowser::File(EngineResource* aResource, ResourceManager::Folder* a
 	}
 	if (open)
 		ImGui::TreePop();
-	ImGuiDragDropFlags src_flags = 0;
-	src_flags |= ImGuiDragDropFlags_SourceNoDisableHover;     // Keep the source displayed as hovered
-	if (ImGui::BeginDragDropSource(src_flags))
-	{
-		ImGui::SetDragDropPayload("RESOURCE", &aResource->myID, sizeof(ResourceID));
-		ImGui::EndDragDropSource();
-	}
-	else if (ImGui::IsItemClicked())
-		selected ? DeselectResource(aResource) : SelectResource(aResource); // If already selected, deselect. Else select.
-	else if (ImGui::IsItemHovered())
-		CopyDrop(aFolder->path);
-	NormalDrop(aFolder->path);
-	
 }
 
 bool ResourceBrowser::CopyLocal(const std::string& aSrc, const std::string& aDest)
@@ -153,7 +164,8 @@ bool ResourceBrowser::NormalDrop(const std::string& aDest)
 	if (ImGui::BeginDragDropTarget())
 	{
 		ImGuiDragDropFlags target_flags = 0;
-		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE", target_flags))
+		const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE", target_flags);
+		if (payload)
 		{
 			ResourceID id = *(ResourceID*)payload->Data;
 			// Get resource
@@ -172,14 +184,11 @@ bool ResourceBrowser::NormalDrop(const std::string& aDest)
 					std::remove((jsonPath + "json").c_str());
 				}
 				resource->myPath = path + resource->myExt;
-				
 				myManager->LoadResources();
-				ImGui::EndDragDropTarget();
-				return true;
 			}
 		}
 		ImGui::EndDragDropTarget();
-		return false;
+		return payload != nullptr;
 	}
 	return false;
 }

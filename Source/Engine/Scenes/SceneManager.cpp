@@ -44,6 +44,13 @@ SceneID SceneManager::LoadScene(EngineResource* aSceneResource)
 		Debug::Error << path << " : Scene resource doc was empty " << std::endl;
 		return -1;
 	}
+
+	const SceneID id = aSceneResource->myID;
+	if (myScenes.find(id) != myScenes.end())
+	{
+		Debug::Warning << path << " : Scene already loaded" << std::endl;
+		return -1;
+	}
 	
 	rapidjson::Document doc;
 	doc.Parse(aSceneResource->myDoc.c_str());
@@ -60,13 +67,6 @@ SceneID SceneManager::LoadScene(EngineResource* aSceneResource)
 	if (!doc["Entities"].IsArray())
 	{
 		Debug::Error << path << " : Entities-array in Json is not formatted properly" << std::endl;
-		return -1;
-	}
-
-	const SceneID id = aSceneResource->myID;
-	if(myScenes.find(id) != myScenes.end())
-	{
-		Debug::Warning << path << " : Scene already loaded";
 		return -1;
 	}
 	

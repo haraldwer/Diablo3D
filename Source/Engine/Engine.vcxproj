@@ -198,6 +198,7 @@
     <ClInclude Include="ECS\ComponentSystems\ExampleSystem.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="ECS\Data\PrefabData.h" />
+    <ClInclude Include="Utility\Time.h" />
     <ClInclude Include="Utility\ImGUIUtility.h" />
     <ClInclude Include="ResouceIDs.h" />
     <ClInclude Include="ECS\Data\Serializable.h" />
@@ -248,6 +249,7 @@
     <ClCompile Include="ECS\Data\PrefabData.cpp" />
     <ClCompile Include="ECS\ComponentSystems\Rigidbody.cpp" />
     <ClCompile Include="ECS\ComponentSystems\ExampleSystem.cpp" />
+    <ClCompile Include="Utility\Time.cpp" />
     <ClCompile Include="Utility\ImGUIUtility.cpp" />
     <ClCompile Include="Utility\Input.cpp" />
     <ClCompile Include="pch.cpp" />

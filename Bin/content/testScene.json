@@ -25,6 +25,9 @@
 		"Overrides":{
 			"Model Renderer":{
 				
+			},
+			"Collider":{
+				
 			}
 		}
 	},
@@ -49,6 +52,9 @@
 		1.0],
 		"Overrides":{
 			"Model Renderer":{
+				
+			},
+			"Collider":{
 				
 			}
 		}

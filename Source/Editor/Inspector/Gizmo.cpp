@@ -60,6 +60,7 @@ bool Gizmo::Manipulate(Transform& aTransform)
 		float rotArr[3];
 		float scaleArr[3];
 		ImGuizmo::DecomposeMatrixToComponents(objectMatrix, posArr, rotArr, scaleArr);
+		ImGui::Spacing();
 		if (ImGui::DragFloat3("Position", posArr, 0.1f)) 
 			changed = true;
 		if (ImGui::DragFloat3("Rotation", rotArr, 0.1f))
@@ -68,6 +69,7 @@ bool Gizmo::Manipulate(Transform& aTransform)
 			changed = true;
 		ImGuizmo::RecomposeMatrixFromComponents(posArr, rotArr, scaleArr, objectMatrix);
 	}
+	ImGui::Spacing();
 
 	//ImGui::PushClipRect(myPos, { myPos.x + mySize.x, myPos.y + mySize.y }, false);
 	ImGuizmo::Manipulate(view, projection, myCurrentOperation, myCurrentMode, objectMatrix, NULL, useSnap ? &snap[0] : NULL, boundSizing ? bounds : NULL, snap ? boundsSnap : NULL);

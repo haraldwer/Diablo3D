@@ -1,9 +1,9 @@
 #pragma once
 
-class ID3D11Device;
-class ID3D11DeviceContext;
-class ID3D11ShaderResourceView;
-class ID3D11Texture2D;
+struct ID3D11Device;
+struct ID3D11DeviceContext;
+struct ID3D11ShaderResourceView;
+struct ID3D11Texture2D;
 class Texture
 {
 public:

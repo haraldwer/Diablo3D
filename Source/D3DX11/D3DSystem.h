@@ -14,7 +14,7 @@ class D3DSystem
 	friend class D3DSprite;
 public:
 	D3DSystem();
-	bool Initialize(CreateParams& params);
+	bool Initialize(CreateParams* params);
 	void Shutdown();
 	bool Frame();
 	void Run();
@@ -27,7 +27,7 @@ public:
     void SetResolution(const int width, const int height);
     void SetFullscreen(const bool aFullscreen);
     void SetClearColor(const float r, const float g, const float b);
-
+	
 	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
 
 private:
@@ -43,7 +43,7 @@ private:
 	HINSTANCE m_hinstance;
 	HWND m_hwnd;
 	Graphics m_Graphics;
-	CreateParams m_params;
+	CreateParams* m_params;
 
 	FrameCounter m_frameCounter;
 	CPUUsage m_cpuUsage;

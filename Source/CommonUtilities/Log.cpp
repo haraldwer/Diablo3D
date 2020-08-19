@@ -72,3 +72,10 @@ Debug::Logger::LogType Debug::Logger::GetType() const
 {
 	return myType;
 }
+
+void Debug::Logger::Clear()
+{
+	myLogs.clear();
+	myWarnings.clear();
+	myErrors.clear();
+}

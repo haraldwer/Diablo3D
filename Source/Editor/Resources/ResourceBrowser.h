@@ -22,4 +22,5 @@ private:
 	bool UnloadedContextMenu(ResourceManager::UnloadedResource* aResource);
 	std::vector<ResourceViewer*> myResourceViewers;
 	ResourceManager* myManager;
+	bool myJustOpened;
 };

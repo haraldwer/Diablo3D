@@ -1,4 +1,5 @@
 #include "PhysicsManager.h"
+#include "Engine/Utility/Time.h"
 
 PhysicsManager::PhysicsManager(): myFoundation(nullptr), myPhysics(nullptr), myDispatcher(nullptr),
                                   myMaterial(nullptr),
@@ -27,7 +28,9 @@ void PhysicsManager::Update(bool run)
 		return;
 	for(auto& scene : myScenes)
 	{
-		scene.second->simulate(1.0f / 2000.0f);
+		if (!scene.second)
+			continue;
+		scene.second->simulate(Time::Delta());
 		scene.second->fetchResults(true);
 	}
 }

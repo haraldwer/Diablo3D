@@ -71,24 +71,11 @@ void Hierarchy::Update(Engine* anEngine)
 				{
 					name = entity->GetName();
 					if(name == "")
-					{
-						if(entity->GetPrefabID() != -1)
-						{
-							auto prefabResource = resourceManager.GetResource(entity->GetPrefabID());
-							if (!prefabResource)
-							{
-								name = "Unable to get prefab resource with id " + std::to_string(entity->GetPrefabID());
-							}
-							else 
-								name = prefabResource->myName;
-						}
-						if(name == "")
-							name = "Unnamed entity";
-					}
+						name = "Unnamed entity";
 				}
 
 				const bool open = ImGui::TreeNodeEx((name + "##" + std::to_string(entityID)).c_str(), myInspector.GetIsSelected(sceneID, entityID) ? ImGuiTreeNodeFlags_Bullet : ImGuiTreeNodeFlags_Leaf);
-
+				DragDrop(sceneID, entityID, anEngine);
 				if (ImGui::BeginPopupContextItem((name + "##" + std::to_string(entityID)).c_str()))
 				{
 					myInspector.SetEntity(sceneID, entityID);
@@ -121,6 +108,8 @@ void Hierarchy::Update(Engine* anEngine)
 			break;
 	}
 
+	DragDrop(-1, -1, anEngine);
+
 	if(myIsFocused)
 	{
 		Input& input = anEngine->GetServiceLocator().GetService<Input>();
@@ -152,19 +141,29 @@ void Hierarchy::DragDrop(SceneID aSceneID, EntityID anEntityID, Engine* anEngine
 			auto resource = resourceManager.GetResource(id);
 			if(resource)
 			{
-				if(resource->myType._value == ResourceType::PREFAB)
+				switch(resource->myType._value)
 				{
-					auto& prefabManager = anEngine->GetServiceLocator().GetService<PrefabManager>();
-					auto prefab = prefabManager.GetPrefab(resource->myID);
-					if(prefab)
+				case ResourceType::PREFAB:
 					{
-						auto& sceneMan = anEngine->GetServiceLocator().GetService<SceneManager>();
-						Scene* scene = sceneMan.GetScene(aSceneID);
-						if (scene)
+						auto& prefabManager = anEngine->GetServiceLocator().GetService<PrefabManager>();
+						auto prefab = prefabManager.GetPrefab(resource->myID);
+						if(prefab)
 						{
-							Entity* entity = scene->CreateEntity(resource->myID);
+							auto& sceneMan = anEngine->GetServiceLocator().GetService<SceneManager>();
+							Scene* scene = aSceneID == -1 ? sceneMan.GetFirstScene() : sceneMan.GetScene(aSceneID);
+							if (scene)
+							{
+								Entity* entity = scene->CreateEntity(resource->myID);
+							}
 						}
 					}
+					break;
+				case ResourceType::SCENE:
+					{
+						auto& sceneManager = anEngine->GetServiceLocator().GetService<SceneManager>();
+						sceneManager.LoadScene(resource->myID);
+					}
+					break;
 				}
 			}
 		}
